@@ -1,6 +1,8 @@
 #ifndef MAESTRO_CMD_HPP
 #define MAESTRO_CMD_HPP
 
+#include "Log.hpp"
+
 namespace shipcontrol
 {
 
@@ -41,6 +43,7 @@ protected:
     int _fd;
     unsigned char _cmd[MAESTRO_CMD_LEN];
     unsigned char _rsp[MAESTRO_RSP_LEN];
+    Log &_log;
 };
 
 } // namespace shipcontrol

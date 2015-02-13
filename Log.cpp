@@ -32,7 +32,7 @@ void Log::release()
     }
 }
 
-Log::Log()
+Log::Log() : _level(LogLevel::NOTICE)
 {
 }
 
@@ -49,15 +49,32 @@ void Log::add_backend(LogBackend *backend)
     }
 }
 
+void Log::write(LogLevel level, const char *fmt, ...)
+{
+    if (level >= _level)
+    {
+        va_list args;
+        va_start(args, fmt);
+        for (LogBackend *backend : _backends)
+        {
+            backend->write(fmt, args);
+        }
+        va_end(args);
+    }
+}
+
 void Log::write(const char *fmt, ...)
 {
-    va_list args;
-    va_start(args, fmt);
-    for (LogBackend *backend : _backends)
+    if (LogLevel::NOTICE >= _level)
     {
-        backend->write(fmt, args);
+        va_list args;
+        va_start(args, fmt);
+        for (LogBackend *backend : _backends)
+        {
+            backend->write(fmt, args);
+        }
+        va_end(args);
     }
-    va_end(args);
 }
 
 } // namespace shipcontrol

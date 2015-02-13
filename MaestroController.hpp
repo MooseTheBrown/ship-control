@@ -3,6 +3,7 @@
 
 #include "MaestroConfig.hpp"
 #include "ServoController.hpp"
+#include "Log.hpp"
 
 #include <vector>
 
@@ -25,6 +26,7 @@ protected:
     std::vector<int> _engines;
     std::vector<int> _steering;
     int _fd;
+    Log &_log;
 
     int speed_to_int(SpeedVal speed);
     SpeedVal int_to_speed(int speed);

@@ -13,6 +13,7 @@ MaestroCmd::MaestroCmd(int fd, MaestroCmdCode code) :
     _cmd[1] = 0;
     _cmd[2] = 0;
     _cmd[3] = 0;
+    _log = Log::getInstance();
 }
 
 // creates command with up to 3 data bytes
@@ -26,6 +27,7 @@ MaestroCmd::MaestroCmd(int fd, MaestroCmdCode code,
     _cmd[1] = byte1;
     _cmd[2] = byte2;
     _cmd[3] = byte3;
+    _log = Log::getInstance();
 }
 
 // execute command and get response
@@ -47,9 +49,17 @@ unsigned char *MaestroCmd::send()
 
     if (write(_fd, (const void *)_cmd, len) == -1)
     {
-        perror("Could not send command to Maestro");
+        _log.write(LogLevel::ERROR,
+                   "MaestroCmd couldn't send command to Maestro, error code %d\n",
+                   errno);
         goto exit;
     }
+    _log.write(LogLevel::DEBUG, "MaestroCmd sent command: ");
+    for (int i = 0; i < len; i++)
+    {
+        _log.write(LogLevel::DEBUG, "0x%x", _cmd[i]);
+    }
+    _log.write("\n");
 
     // calculate response length
     len = rspLen();
@@ -57,8 +67,15 @@ unsigned char *MaestroCmd::send()
     {
         if (read(_fd, (void *)_rsp, len) == -1)
         {
-            perror("Could not read response from Maestro");
+            _log.write(LogLevel::ERROR,
+                       "MaestroCmd couldn't read response from Maestro, error code %d\n",
+                       errno);
             goto exit;
+        }
+        _log.write(LogLevel::DEBUG, "MaestroCmd received response: ");
+        for (int i = 0; i < len; i++)
+        {
+            _log.write(LogLevel::DEBUG, "0x%x", _rsp[i]);
         }
     }
 

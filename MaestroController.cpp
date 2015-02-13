@@ -33,6 +33,8 @@ MaestroController::MaestroController(MaestroConfig &config) :
     _engines = _config.get_engine_channels();
     _steering = _config.get_steering_channels();
 
+    _log = Log::getInstance();
+
     // open and configure Maestro serial device
     if (_dev != nullptr) {
         _fd = open(_dev, O_RDWR, 0);
@@ -51,7 +53,7 @@ MaestroController::MaestroController(MaestroConfig &config) :
         }
         else
         {
-            perror(_dev);
+            _log.write(LogLevel::ERROR, "Couldn't open Maestro device, error code %d\n", errno);
         }
     }
 }
@@ -75,6 +77,7 @@ SpeedVal MaestroController::get_speed()
     MaestroCmd cmd(_fd, MaestroCmdCode::GETPOS, _engines[0]);
     unsigned char *pval = cmd.send();
     int val = (*(pval + 1) << 8) | (*pval);
+    _log.write(LogLevel::DEBUG, "MaestroController::get_speed(), value=%d\n", val);
     return int_to_speed(val);
 }
 
@@ -86,6 +89,7 @@ void MaestroController::set_speed(SpeedVal speed)
     }
 
     int val = speed_to_int(speed);
+    _log.write(LogLevel::DEBUG, "MaestroController::set_speed(), value=%d\n", val);
     unsigned char val0 = val & 0xFF;
     unsigned char val1 = (val >> 8) & 0xFF;
 
@@ -107,6 +111,7 @@ SteeringVal MaestroController::get_steering()
     MaestroCmd cmd(_fd, MaestroCmdCode::GETPOS, _steering[0]);
     unsigned char *pval = cmd.send();
     int val = (*(pval + 1) << 8) | (*pval);
+    _log.write(LogLevel::DEBUG, "MaestroController::get_steering(), value=%d\n", val);
     return int_to_steering(val);
 }
 
@@ -118,6 +123,7 @@ void MaestroController::set_steering(SteeringVal steering)
     }
 
     int val = steering_to_int(steering);
+    _log.write(LogLevel::DEBUG, "MaestroController::set_steering(), value=%d\n", val);
     unsigned char val0 = val & 0xFF;
     unsigned char val1 = (val >> 8) & 0xFF;
 
@@ -362,16 +368,19 @@ bool MaestroController::is_sane()
 {
     if (_fd == -1)
     {
+        _log.write(LogLevel::ERROR, "MaestroController isn't sane: no Maestro device\n");
         return false;
     }
 
     if (_engines.size() == 0)
     {
+        _log.write(LogLevel::ERROR, "MaestroController isn't sane: no engines\n");
         return false;
     }
 
     if (_steering.size() == 0)
     {
+        _log.write(LogLevel::ERROR, "MaestroController isn't sane: no steering\n");
         return false;
     }
 
