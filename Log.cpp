@@ -7,7 +7,7 @@ unsigned int Log::_refs = 0;
 std::mutex Log::_ref_mutex;
 Log *Log::_instance = nullptr;
 
-Log &Log::getInstance()
+Log *Log::getInstance()
 {
     std::lock_guard<std::mutex> lock(_ref_mutex);
 
@@ -17,7 +17,7 @@ Log &Log::getInstance()
     }
     _refs++;
 
-    return *_instance;
+    return _instance;
 }
 
 void Log::release()

@@ -1,6 +1,9 @@
 #include "SysLog.hpp"
 #include <syslog.h>
 
+namespace shipcontrol
+{
+
 const char *SysLog::_ident = "ship-control";
 
 SysLog::SysLog()
@@ -17,3 +20,5 @@ void SysLog::write(const char *fmt, va_list args)
 {
     vsyslog(LOG_INFO, fmt, args);
 }
+
+} // namespace shipcontrol

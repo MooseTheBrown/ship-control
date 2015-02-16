@@ -10,9 +10,9 @@ namespace shipcontrol
 class MaestroConfig
 {
 public:
-    const char *get_maestro_dev() = 0;
-    std::vector<int> get_engine_channels() = 0;
-    std::vector<int> get_steering_channels() = 0;
+    virtual const char *get_maestro_dev() = 0;
+    virtual std::vector<int> get_engine_channels() = 0;
+    virtual std::vector<int> get_steering_channels() = 0;
 };
 
 }

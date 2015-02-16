@@ -1,5 +1,8 @@
 #include "Log.hpp"
 
+namespace shipcontrol
+{
+
 // log backend, which writes to syslog
 class SysLog : public LogBackend
 {
@@ -11,3 +14,5 @@ public:
 protected:
     static const char *_ident;
 };
+
+} // namespace shipcontrol

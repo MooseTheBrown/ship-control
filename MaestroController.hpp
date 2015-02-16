@@ -22,11 +22,11 @@ public:
 
 protected:
     MaestroConfig &_config;
-    const char *dev;
+    const char *_dev;
     std::vector<int> _engines;
     std::vector<int> _steering;
     int _fd;
-    Log &_log;
+    Log *_log;
 
     int speed_to_int(SpeedVal speed);
     SpeedVal int_to_speed(int speed);

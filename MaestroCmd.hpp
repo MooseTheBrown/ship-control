@@ -26,8 +26,6 @@ enum class MaestroCmdCode : unsigned char
 class MaestroCmd
 {
 public:
-    // creates command with no data bytes
-    MaestroCmd(int fd, MaestroCmdCode code);
     // creates command with up to 3 data bytes
     MaestroCmd(int fd, MaestroCmdCode code,
                unsigned char byte1 = 0,
@@ -43,7 +41,7 @@ protected:
     int _fd;
     unsigned char _cmd[MAESTRO_CMD_LEN];
     unsigned char _rsp[MAESTRO_RSP_LEN];
-    Log &_log;
+    Log *_log;
 };
 
 } // namespace shipcontrol

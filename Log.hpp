@@ -27,7 +27,7 @@ enum class LogLevel : unsigned char
 class Log
 {
 public:
-    static Log &getInstance();
+    static Log *getInstance();
     static void release();
     void add_backend(LogBackend *backend);
     void write(LogLevel level, const char *fmt, ...);
