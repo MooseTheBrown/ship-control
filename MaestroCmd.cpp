@@ -49,7 +49,6 @@ unsigned char *MaestroCmd::send()
     {
         _log->write(LogLevel::DEBUG, "0x%x", _cmd[i]);
     }
-    _log->write("\n");
 
     // calculate response length
     len = rspLen();
@@ -65,7 +64,7 @@ unsigned char *MaestroCmd::send()
         _log->write(LogLevel::DEBUG, "MaestroCmd received response: ");
         for (int i = 0; i < len; i++)
         {
-            _log->write(LogLevel::DEBUG, "0x%x", _rsp[i]);
+            _log->write(LogLevel::DEBUG, "0x%x ", _rsp[i]);
         }
     }
 

@@ -15,15 +15,19 @@ const int MAESTRO_MAX_FWD = 2000 * 4;
 const int MAESTRO_STOP = 1470 * 4;
 const int MAESTRO_MAX_REV = 992 * 4;
 
-const int MAESTRO_FWD_RANGE = MAESTRO_MAX_FWD - MAESTRO_STOP;
-const int MAESTRO_REV_RANGE = MAESTRO_STOP - MAESTRO_MAX_FWD;
+const int MAESTRO_FWD_RANGE = MAESTRO_MAX_FWD - MAESTRO_STOP -
+                              ((MAESTRO_MAX_FWD - MAESTRO_STOP) % 10);
+const int MAESTRO_REV_RANGE = MAESTRO_STOP - MAESTRO_MAX_REV -
+                              ((MAESTRO_STOP - MAESTRO_MAX_REV) % 10);
 
 const int MAESTRO_STRAIGHT = 1670 * 4;
 const int MAESTRO_LEFT_MAX = 992 * 4;
 const int MAESTRO_RIGHT_MAX = 2336 * 4;
 
-const int MAESTRO_RIGHT_RANGE = MAESTRO_RIGHT_MAX - MAESTRO_STRAIGHT;
-const int MAESTRO_LEFT_RANGE = MAESTRO_STRAIGHT - MAESTRO_LEFT_MAX;
+const int MAESTRO_RIGHT_RANGE = MAESTRO_RIGHT_MAX - MAESTRO_STRAIGHT -
+                                ((MAESTRO_RIGHT_MAX - MAESTRO_STRAIGHT) % 10);
+const int MAESTRO_LEFT_RANGE = MAESTRO_STRAIGHT - MAESTRO_LEFT_MAX -
+                               ((MAESTRO_STRAIGHT - MAESTRO_LEFT_MAX) % 10);
 
 MaestroController::MaestroController(MaestroConfig &config) :
     _config(config),
@@ -48,9 +52,9 @@ MaestroController::MaestroController(MaestroConfig &config) :
             options.c_oflag &= ~(ONLCR | OCRNL);
             tcsetattr(_fd, TCSANOW, &options);
 
-            // send "Go Home" command
-            MaestroCmd cmd(_fd, MaestroCmdCode::GOHOME);
-            cmd.send();
+            // set speed to STOP and steering position to STRAIGHT
+            set_speed(SpeedVal::STOP);
+            set_steering(SteeringVal::STRAIGHT);
         }
         else
         {
@@ -61,6 +65,12 @@ MaestroController::MaestroController(MaestroConfig &config) :
 
 MaestroController::~MaestroController()
 {
+    if (is_sane() == true)
+    {
+        set_speed(SpeedVal::STOP);
+        set_steering(SteeringVal::STRAIGHT);
+    }
+
     if (_fd != -1)
     {
         close(_fd);
@@ -91,8 +101,8 @@ void MaestroController::set_speed(SpeedVal speed)
 
     int val = speed_to_int(speed);
     _log->write(LogLevel::DEBUG, "MaestroController::set_speed(), value=%d\n", val);
-    unsigned char val0 = val & 0xFF;
-    unsigned char val1 = (val >> 8) & 0xFF;
+    unsigned char val0 = val & 0x7F;
+    unsigned char val1 = (val >> 7) & 0x7F;
 
     // send command for each engine
     for (int engine : _engines) {
@@ -125,8 +135,8 @@ void MaestroController::set_steering(SteeringVal steering)
 
     int val = steering_to_int(steering);
     _log->write(LogLevel::DEBUG, "MaestroController::set_steering(), value=%d\n", val);
-    unsigned char val0 = val & 0xFF;
-    unsigned char val1 = (val >> 8) & 0xFF;
+    unsigned char val0 = val & 0x7F;
+    unsigned char val1 = (val >> 7) & 0x7F;
 
     // send command for each steering servo
     for (int servo : _steering) {
