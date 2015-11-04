@@ -13,7 +13,7 @@
 
 namespace sc = shipcontrol;
 
-namespace maestro_test
+namespace evdev_test
 {
 
 #define TEST_DEV_NAME "EvdevTestDevice"
@@ -245,4 +245,4 @@ TEST_F(EvdevTest, EventTest)
     ASSERT_TRUE(_queue.is_empty());
 }
 
-} // namespace maestro_test
+} // namespace evdev_test
