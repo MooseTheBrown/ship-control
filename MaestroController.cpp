@@ -12,7 +12,7 @@ namespace shipcontrol
 {
 
 const int MAESTRO_MAX_FWD = 2000 * 4;
-const int MAESTRO_STOP = 1470 * 4;
+const int MAESTRO_STOP = 1480 * 4;
 const int MAESTRO_MAX_REV = 992 * 4;
 
 const int MAESTRO_FWD_RANGE = MAESTRO_MAX_FWD - MAESTRO_STOP -
@@ -75,6 +75,8 @@ MaestroController::~MaestroController()
     {
         close(_fd);
     }
+
+    Log::release();
 }
 
 SpeedVal MaestroController::get_speed()
