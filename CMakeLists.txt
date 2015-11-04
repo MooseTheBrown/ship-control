@@ -15,11 +15,16 @@ include_directories (${ship-control_SOURCE_DIR})
 set (SHIPCONTROL_SRC Log.cpp
                      SysLog.cpp
                      MaestroCmd.cpp
-                     MaestroController.cpp)
+                     MaestroController.cpp
+                     InputQueue.cpp
+                     EvdevReader.cpp
+                     EvdevConfig.cpp)
 
 if (BUILD_TESTS)
-    set (TESTS_SRC ${SHIPCONTROL_SRC} test/main.cpp
-                                      test/maestro_test.cpp)
+    set (TESTS_SRC ${SHIPCONTROL_SRC}
+                   test/main.cpp
+                   test/maestro_test.cpp
+                   test/evdev_test.cpp)
     find_library (GTEST_LIB NAMES gtest)
     if (${GTEST_LIB} EQUAL "GTEST_LIB-NOTFOUND")
         message(FATAL_ERROR "Google Test not found")
