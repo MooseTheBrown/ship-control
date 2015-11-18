@@ -1,5 +1,6 @@
 #include <queue>
 #include <mutex>
+#include <condition_variable>
 
 namespace shipcontrol
 {
@@ -21,10 +22,14 @@ public:
 
     void push(InputEvent event);
     InputEvent pop();
+    // pop_blocking blocks the calling thread until there's data in the queue
+    InputEvent pop_blocking();
     bool is_empty();
 protected:
     std::queue<InputEvent> _queue;
     std::mutex _queue_mutex;
+    std::mutex _block_mutex;
+    std::condition_variable _block_var;
 };
 
 } // namespace shipcontrol

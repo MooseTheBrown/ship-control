@@ -245,4 +245,32 @@ TEST_F(EvdevTest, EventTest)
     ASSERT_TRUE(_queue.is_empty());
 }
 
+TEST_F(EvdevTest, BlockingTest)
+{
+    std::thread thread([this]()->void
+    {
+        std::this_thread::sleep_for(std::chrono::seconds(1));
+
+        input_event event;
+        event.type = EV_KEY;
+        event.code = KEY_W;
+        event.value = 1;
+        write(_fd, &event, sizeof (input_event));
+
+        std::this_thread::sleep_for(std::chrono::milliseconds(100));
+
+        event.type = EV_SYN;
+        event.code = SYN_REPORT;
+        event.value = 0;
+        write(_fd, &event, sizeof (input_event));
+
+        std::this_thread::sleep_for(std::chrono::milliseconds(100));
+    });
+
+    sc::InputEvent evt = _queue.pop_blocking();
+    ASSERT_EQ(sc::InputEvent::SPEED_UP, evt);
+
+    thread.join();
+}
+
 } // namespace evdev_test
