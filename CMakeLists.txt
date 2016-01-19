@@ -5,10 +5,14 @@ project (ship-control)
 option (BUILD_TESTS "Build tests" ON)
 
 set (COMMON_CXX_FLAGS "-std=c++11")
+set (TEST_CXX_FLAGS "")
+if (BUILD_TESTS)
+    set (TEST_CXX_FLAGS -DTESTCONFIG_FILE=\\\"${ship-control_SOURCE_DIR}/test/testconfig\\\")
+endif (BUILD_TESTS)
 set (CMAKE_BUILD_TYPE RelWithDebInfo)
 set (CMAKE_LINKER_FLAGS -ldl)
-set (CMAKE_CXX_FLAGS_RELWITHDEBINFO "${COMMON_CXX_FLAGS} -ggdb")
-set (CMAKE_CXX_FLAGS_RELEASE ${COMMON_CXX_FLAGS})
+set (CMAKE_CXX_FLAGS_RELWITHDEBINFO "${COMMON_CXX_FLAGS} ${TEST_CXX_FLAGS} -ggdb")
+set (CMAKE_CXX_FLAGS_RELEASE "${COMMON_CXX_FLAGS} ${TEST_CXX_FLAGS}")
 
 include_directories (${ship-control_SOURCE_DIR})
 
@@ -18,13 +22,15 @@ set (SHIPCONTROL_SRC Log.cpp
                      MaestroController.cpp
                      InputQueue.cpp
                      EvdevReader.cpp
-                     EvdevConfig.cpp)
+                     EvdevConfig.cpp
+                     Config.cpp)
 
 if (BUILD_TESTS)
     set (TESTS_SRC ${SHIPCONTROL_SRC}
                    test/main.cpp
                    test/maestro_test.cpp
-                   test/evdev_test.cpp)
+                   test/evdev_test.cpp
+                   test/config_test.cpp)
     find_library (GTEST_LIB NAMES gtest)
     if (${GTEST_LIB} EQUAL "GTEST_LIB-NOTFOUND")
         message(FATAL_ERROR "Google Test not found")

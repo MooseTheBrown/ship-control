@@ -1,0 +1,13 @@
+{
+    "engines": [1, 8],
+    "steering": [2, 6],
+    "maestro_device": "/dev/ttyACM3",
+    "keymap": {
+        "KEY_1": "SPEED_UP",
+        "KEY_2": "SPEED_DOWN"
+    },
+    "relmap": {
+        "REL_Y+": "TURN_RIGHT",
+        "REL_X-": "TURN_LEFT"
+    }
+}
