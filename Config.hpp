@@ -11,7 +11,8 @@ namespace shipcontrol
 {
 
 // Configuration provider for EvdevReader
-class Config : public EvdevConfig, MaestroConfig
+class Config : public EvdevConfig,
+               public MaestroConfig
 {
 public:
     Config(const std::string &filename);

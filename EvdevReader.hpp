@@ -3,9 +3,9 @@
 
 #include "EvdevConfig.hpp"
 #include "Log.hpp"
+#include <linux/input.h>
 #include <string>
 #include <thread>
-#include <linux/input.h>
 
 namespace shipcontrol
 {

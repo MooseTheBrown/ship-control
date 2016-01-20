@@ -1,3 +1,6 @@
+#ifndef INPUT_QUEUE_HPP
+#define INPUT_QUEUE_HPP
+
 #include <queue>
 #include <mutex>
 #include <condition_variable>
@@ -33,3 +36,5 @@ protected:
 };
 
 } // namespace shipcontrol
+
+#endif // INPUT_QUEUE_HPP

@@ -135,6 +135,8 @@ Config::Config(const std::string &filename) :
     _keystring_map.insert(std::make_pair("KEY_KPPLUSMINUS", KEY_KPPLUSMINUS));
     _keystring_map.insert(std::make_pair("KEY_PAUSE", KEY_PAUSE));
     _keystring_map.insert(std::make_pair("KEY_SCALE", KEY_SCALE));
+    _keystring_map.insert(std::make_pair("BTN_LEFT", BTN_LEFT));
+    _keystring_map.insert(std::make_pair("BTN_RIGHT", BTN_RIGHT));
 
 
     _relstring_map.insert(std::make_pair("REL_X+", RelEvent{REL_X, true}));

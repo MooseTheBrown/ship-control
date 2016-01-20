@@ -4,7 +4,7 @@ project (ship-control)
 
 option (BUILD_TESTS "Build tests" ON)
 
-set (COMMON_CXX_FLAGS "-std=c++11")
+set (COMMON_CXX_FLAGS "-std=c++11 -pthread")
 set (TEST_CXX_FLAGS "")
 if (BUILD_TESTS)
     set (TEST_CXX_FLAGS -DTESTCONFIG_FILE=\\\"${ship-control_SOURCE_DIR}/test/testconfig\\\")
@@ -23,7 +23,9 @@ set (SHIPCONTROL_SRC Log.cpp
                      InputQueue.cpp
                      EvdevReader.cpp
                      EvdevConfig.cpp
-                     Config.cpp)
+                     Config.cpp
+                     shipcontrol.cpp)
+add_executable (ship-control ${SHIPCONTROL_SRC} main.cpp)
 
 if (BUILD_TESTS)
     set (TESTS_SRC ${SHIPCONTROL_SRC}
