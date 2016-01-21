@@ -27,6 +27,9 @@ set (SHIPCONTROL_SRC Log.cpp
                      shipcontrol.cpp)
 add_executable (ship-control ${SHIPCONTROL_SRC} main.cpp)
 
+install (TARGETS ship-control DESTINATION bin)
+install (FILES shipcontrol.conf DESTINATION /etc)
+
 if (BUILD_TESTS)
     set (TESTS_SRC ${SHIPCONTROL_SRC}
                    test/main.cpp
