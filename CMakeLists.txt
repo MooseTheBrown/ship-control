@@ -2,7 +2,7 @@ cmake_minimum_required (VERSION 2.6)
 
 project (ship-control)
 
-option (BUILD_TESTS "Build tests" ON)
+option (BUILD_TESTS "Build tests" OFF)
 
 set (COMMON_CXX_FLAGS "-std=c++11 -pthread")
 set (TEST_CXX_FLAGS "")
