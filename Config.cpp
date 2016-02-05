@@ -9,7 +9,8 @@ namespace shipcontrol
 {
 
 Config::Config(const std::string &filename) :
-    _is_ok(true)
+    _is_ok(true),
+    _logLevel(LogLevel::ERROR)
 {
     // prepare internal string-to-value maps for:
     // 1. Linux input keys
@@ -261,6 +262,20 @@ void Config::parse(const std::string &filename)
                 _is_ok = false;
             }
         }
+    }
+    else
+    {
+        _is_ok = false;
+    }
+
+    // get loglevel
+    if (j.find("loglevel") != j.end())
+    {
+        auto log_level = j["loglevel"];
+        std::string str_level = log_level.get<std::string>();
+        if (str_level == "error") { _logLevel = LogLevel::ERROR; }
+        else if (str_level == "notice") { _logLevel = LogLevel::NOTICE; }
+        else if (str_level == "debug") { _logLevel = LogLevel::DEBUG; }
     }
     else
     {

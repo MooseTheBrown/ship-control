@@ -42,6 +42,9 @@ TEST(Config, ConfigTest)
     ASSERT_EQ(2, steering.size());
     ASSERT_EQ(2, steering[0]);
     ASSERT_EQ(6, steering[1]);
+
+    sc::LogLevel log_level = config.get_log_level();
+    ASSERT_EQ(sc::LogLevel::NOTICE, log_level);
 }
 
 } // namespace config_test

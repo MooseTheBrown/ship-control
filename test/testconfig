@@ -9,5 +9,6 @@
     "relmap": {
         "REL_Y+": "TURN_RIGHT",
         "REL_X-": "TURN_LEFT"
-    }
+    },
+    "loglevel": "notice"
 }
