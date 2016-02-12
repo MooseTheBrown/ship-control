@@ -279,6 +279,8 @@ SpeedVal MaestroController::int_to_speed(int speed)
         return SpeedVal::REV90;
     case -10:
         return SpeedVal::REV100;
+    default:
+        return SpeedVal::STOP;
     }
 }
 
@@ -394,6 +396,8 @@ SteeringVal MaestroController::int_to_steering(int steering)
         return SteeringVal::LEFT90;
     case -10:
         return SteeringVal::LEFT100;
+    default:
+        return SteeringVal::STRAIGHT;
     }
 }
 
