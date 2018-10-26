@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016 Mikhail Sapozhnikov
+ * Copyright (C) 2016-2018 Mikhail Sapozhnikov
  *
  * This file is part of ship-control.
  *
@@ -182,6 +182,12 @@ void Config::parse(const std::string &filename)
 {
     json j;
     std::ifstream in(filename.c_str());
+
+    if (!in.is_open())
+    {
+        _is_ok = false;
+        return;
+    }
 
     in >> j;
 
