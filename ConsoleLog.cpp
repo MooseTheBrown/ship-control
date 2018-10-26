@@ -21,7 +21,7 @@
 #include <ConsoleLog.hpp>
 #include <cstdio>
 
-namespace ship-control
+namespace shipcontrol
 {
 
 ConsoleLog::ConsoleLog()
@@ -37,4 +37,4 @@ void ConsoleLog::write(const char *fmt, va_list args)
     std::vprintf(fmt, args);
 }
 
-} // namespace ship-control
+} // namespace shipcontrol

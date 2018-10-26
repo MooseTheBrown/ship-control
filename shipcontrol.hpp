@@ -25,6 +25,7 @@
 #include "InputQueue.hpp"
 #include "EvdevReader.hpp"
 #include "MaestroController.hpp"
+#include "ConsoleLog.hpp"
 #include "SysLog.hpp"
 
 namespace shipcontrol
@@ -52,6 +53,7 @@ protected:
     MaestroController *_controller;
     std::string _psmoveinput_dev;
     Log *_log;
+    ConsoleLog _clog;
     SysLog _syslog;
 
     int init();

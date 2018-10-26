@@ -36,6 +36,7 @@ set (CMAKE_CXX_FLAGS_RELEASE "${COMMON_CXX_FLAGS} ${TEST_CXX_FLAGS}")
 include_directories (${ship-control_SOURCE_DIR})
 
 set (SHIPCONTROL_SRC Log.cpp
+                     ConsoleLog.cpp
                      SysLog.cpp
                      MaestroCmd.cpp
                      MaestroController.cpp

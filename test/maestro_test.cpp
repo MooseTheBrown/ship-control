@@ -22,7 +22,7 @@
 #include <thread>
 #include <chrono>
 #include "MaestroController.hpp"
-#include "SysLog.hpp"
+#include "ConsoleLog.hpp"
 
 namespace sc = shipcontrol;
 
@@ -58,7 +58,7 @@ public:
     virtual void SetUp()
     {
         _log = sc::Log::getInstance();
-        _log->add_backend(&_syslog);
+        _log->add_backend(&_clog);
         _log->set_level(sc::LogLevel::DEBUG);
         _controller = new sc::MaestroController(_testConfig);
     }
@@ -73,7 +73,7 @@ protected:
     sc::MaestroController *_controller;
     TestMaestroConfig _testConfig;
     sc::Log *_log;
-    sc::SysLog _syslog;
+    sc::ConsoleLog _clog;
 };
 
 TEST_F(MaestroTest, SpeedTest)

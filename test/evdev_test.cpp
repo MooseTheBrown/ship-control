@@ -29,7 +29,7 @@
 #include <thread>
 #include <chrono>
 #include "EvdevReader.hpp"
-#include "SysLog.hpp"
+#include "ConsoleLog.hpp"
 
 namespace sc = shipcontrol;
 
@@ -67,7 +67,7 @@ public:
     virtual void TearDown();
 protected:
     sc::Log *_log;
-    sc::SysLog _syslog;
+    sc::ConsoleLog _clog;
     int _fd;
     std::string _device;
     sc::EvdevReader *_reader;
@@ -80,7 +80,7 @@ protected:
 void EvdevTest::SetUp()
 {
     _log = sc::Log::getInstance();
-    _log->add_backend(&_syslog);
+    _log->add_backend(&_clog);
     _log->set_level(sc::LogLevel::DEBUG);
 
     _fd = open("/dev/uinput", O_WRONLY);

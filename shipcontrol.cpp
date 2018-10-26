@@ -41,7 +41,6 @@ ShipControl::ShipControl() :
 {
     _log = Log::getInstance();
     _log->add_backend(&_syslog);
-    _log->set_level(LogLevel::DEBUG);
 }
 
 ShipControl::~ShipControl()
@@ -107,17 +106,33 @@ int ShipControl::run()
 
 int ShipControl::init()
 {
-    _log->write(LogLevel::DEBUG, "initializing ShipControl\n");
+    // read config
     _config = new Config(CONFIG_FILE);
     if (_config->is_ok() == false)
     {
         return RETVAL_INVALID_CONFIG;
     }
 
-    find_input_device(PSMOVEINPUT_DEVICE_NAME, _psmoveinput_dev);
+    // configure logging
+    std::vector<LogBackendType> log_backends = _config->get_log_backends();
+    for (auto backend : log_backends)
+    {
+        if (backend == LogBackendType::CONSOLE)
+        {
+            _log->add_backend(&_clog);
+        }
+        else if (backend == LogBackendType::SYSLOG)
+        {
+            _log->add_backend(&_syslog);
+        }
+    }
+    _log->set_level(_config->get_log_level());
 
+    // initialize input
+    find_input_device(PSMOVEINPUT_DEVICE_NAME, _psmoveinput_dev);
     _evdevReader = new EvdevReader(*_config, _psmoveinput_dev, _inputQueue);
 
+    // initialize Maestro controller
     _controller = new MaestroController(*_config);
 
     return RETVAL_OK;
