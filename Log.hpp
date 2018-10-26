@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016 Mikhail Sapozhnikov
+ * Copyright (C) 2016 - 2018 Mikhail Sapozhnikov
  *
  * This file is part of ship-control.
  *
@@ -41,6 +41,12 @@ enum class LogLevel : unsigned char
     ERROR = 2,
     NOTICE = 1,
     DEBUG = 0
+};
+
+enum class LogBackendType : unsigned char
+{
+    CONSOLE = 0,
+    SYSLOG = 1
 };
 
 // log interface

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016 Mikhail Sapozhnikov
+ * Copyright (C) 2016 - 2018 Mikhail Sapozhnikov
  *
  * This file is part of ship-control.
  *
@@ -36,6 +36,8 @@ TEST(Config, ConfigTest)
     std::string testfile(TESTCONFIG_FILE);
     sc::Config config(testfile);
 
+    ASSERT_EQ(true, config.is_ok());
+
     const sc::key_map *keymap = config.get_keymap();
     sc::InputEvent evt = keymap->at(KEY_1);
     ASSERT_EQ(sc::InputEvent::SPEED_UP, evt);
@@ -62,6 +64,11 @@ TEST(Config, ConfigTest)
     ASSERT_EQ(2, steering.size());
     ASSERT_EQ(2, steering[0]);
     ASSERT_EQ(6, steering[1]);
+
+    std::vector<sc::LogBackendType> log_backends = config.get_log_backends();
+    ASSERT_EQ(2, log_backends.size());
+    ASSERT_EQ(sc::LogBackendType::CONSOLE, log_backends[0]);
+    ASSERT_EQ(sc::LogBackendType::SYSLOG, log_backends[1]);
 
     sc::LogLevel log_level = config.get_log_level();
     ASSERT_EQ(sc::LogLevel::NOTICE, log_level);

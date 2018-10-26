@@ -10,5 +10,6 @@
         "REL_Y+": "TURN_RIGHT",
         "REL_X-": "TURN_LEFT"
     },
+    "logbackends": ["console", "syslog"],
     "loglevel": "notice"
 }

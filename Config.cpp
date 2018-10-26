@@ -294,6 +294,28 @@ void Config::parse(const std::string &filename)
         _is_ok = false;
     }
 
+    // get log backends
+    if (j.find("logbackends") != j.end())
+    {
+        auto backends = j["logbackends"];
+        for (auto backend : backends)
+        {
+            std::string str_backend = backend.get<std::string>();
+            if (str_backend == "console")
+            {
+                _logBackends.push_back(LogBackendType::CONSOLE);
+            }
+            else if (str_backend == "syslog")
+            {
+                _logBackends.push_back(LogBackendType::SYSLOG);
+            }
+        }
+    }
+    else
+    {
+        _is_ok = false;
+    }
+
     // get loglevel
     if (j.find("loglevel") != j.end())
     {

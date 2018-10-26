@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016 Mikhail Sapozhnikov
+ * Copyright (C) 2016 - 2018 Mikhail Sapozhnikov
  *
  * This file is part of ship-control.
  *
@@ -31,7 +31,7 @@
 namespace shipcontrol
 {
 
-// Configuration provider for EvdevReader
+// json-based configuration provider
 class Config : public EvdevConfig,
                public MaestroConfig
 {
@@ -47,6 +47,7 @@ public:
     virtual std::vector<int> get_engine_channels() { return _engines; }
     virtual std::vector<int> get_steering_channels() { return _steering; }
     // general configuration
+    std::vector<LogBackendType> get_log_backends() { return _logBackends; }
     LogLevel get_log_level() { return _logLevel; }
 
     bool is_ok() { return _is_ok; }
@@ -61,6 +62,7 @@ protected:
     std::unordered_map<std::string, InputEvent> _evtstring_map;
     key_map _keymap;
     rel_map _relmap;
+    std::vector<LogBackendType> _logBackends;
     LogLevel _logLevel;
 
     void parse(const std::string &filename);
