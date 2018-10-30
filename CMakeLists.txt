@@ -44,6 +44,7 @@ set (SHIPCONTROL_SRC Log.cpp
                      EvdevReader.cpp
                      EvdevConfig.cpp
                      Config.cpp
+                     IPCRequestHandler.cpp
                      shipcontrol.cpp)
 add_executable (ship-control ${SHIPCONTROL_SRC} main.cpp)
 
@@ -55,6 +56,7 @@ if (BUILD_TESTS)
                    test/main.cpp
                    test/maestro_test.cpp
                    test/evdev_test.cpp
+                   test/ipc_handler_test.cpp
                    test/config_test.cpp)
     find_library (GTEST_LIB NAMES gtest)
     if (${GTEST_LIB} EQUAL "GTEST_LIB-NOTFOUND")

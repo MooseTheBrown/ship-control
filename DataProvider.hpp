@@ -18,26 +18,26 @@
  *
  */
 
-#ifndef SYSLOG_HPP
-#define SYSLOG_HPP
+#ifndef DATAPROVIDER_HPP
+#define DATAPROVIDER_HPP
 
-#include "Log.hpp"
+#include "ServoController.hpp" // included for SpeedVal/SteeringVal definitions
 
 namespace shipcontrol
 {
 
-// log backend, which writes to syslog
-class SysLog : public LogBackend
+/*
+ * Data provider interface.
+ * Unlike ServoController, this interface doesn't give any control over
+ * engine/steering operation, it simply provides current ship status
+ */
+class DataProvider
 {
 public:
-    SysLog();
-    virtual ~SysLog();
-    virtual void write(const char *fmt, va_list args);
-
-protected:
-    static const char *_ident;
+    virtual SpeedVal get_speed() = 0;
+    virtual SteeringVal get_steering() = 0;
 };
 
 } // namespace shipcontrol
 
-#endif // SYSLOG_HPP
+#endif // DATAPROVIDER_HPP

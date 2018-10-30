@@ -18,6 +18,9 @@
  *
  */
 
+#ifndef CONSOLELOG_HPP
+#define CONSOLELOG_HPP
+
 #include "Log.hpp"
 
 namespace shipcontrol
@@ -33,3 +36,5 @@ public:
 };
 
 } // namespace shipcontrol
+
+#endif // CONSOLELOG_HPP
