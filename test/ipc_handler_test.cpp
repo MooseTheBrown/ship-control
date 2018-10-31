@@ -138,6 +138,15 @@ TEST_F(IPCHandlerTest, InvalidCommand)
     ASSERT_TRUE(resp["status"].get<std::string>() == "fail");
 }
 
-// TODO: add query tests
+TEST_F(IPCHandlerTest, Query)
+{
+    json rq;
+    json resp;
+
+    rq["type"] = "query";
+    resp = json::parse(_handler->handleRequest(rq.dump()));
+    ASSERT_EQ("fwd100", resp["speed"]);
+    ASSERT_EQ("right50", resp["steering"]);
+}
 
 } // namespace ipc_handler_test
