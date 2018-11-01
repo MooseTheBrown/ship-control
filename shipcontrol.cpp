@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016 Mikhail Sapozhnikov
+ * Copyright (C) 2016 - 2018 Mikhail Sapozhnikov
  *
  * This file is part of ship-control.
  *
@@ -37,7 +37,9 @@ static bool stop = false;
 ShipControl::ShipControl() :
     _config(nullptr),
     _evdevReader(nullptr),
-    _controller(nullptr)
+    _controller(nullptr),
+    _speed(SpeedVal::STOP),
+    _steering(SteeringVal::STRAIGHT)
 {
     _log = Log::getInstance();
     _log->add_backend(&_syslog);
@@ -134,6 +136,8 @@ int ShipControl::init()
 
     // initialize Maestro controller
     _controller = new MaestroController(*_config);
+    _speed = _controller->get_speed();
+    _steering = _controller->get_steering();
 
     return RETVAL_OK;
 }
@@ -240,6 +244,7 @@ void ShipControl::turn_right()
     }
 
     _controller->set_steering(new_steering);
+    _steering = _controller->get_steering();
 }
 
 void ShipControl::turn_left()
@@ -314,6 +319,7 @@ void ShipControl::turn_left()
     }
 
     _controller->set_steering(new_steering);
+    _steering = _controller->get_steering();
 }
 
 void ShipControl::speed_up()
@@ -388,6 +394,7 @@ void ShipControl::speed_up()
     }
 
     _controller->set_speed(new_speed);
+    _speed = _controller->get_speed();
 }
 
 void ShipControl::speed_down()
@@ -462,6 +469,7 @@ void ShipControl::speed_down()
     }
 
     _controller->set_speed(new_speed);
+    _speed = _controller->get_speed();
 }
 
 void ShipControl::setup_signals()

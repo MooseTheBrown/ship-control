@@ -294,6 +294,16 @@ void Config::parse(const std::string &filename)
         _is_ok = false;
     }
 
+    // get unix socket name
+    if (j.find("unix_socket") != j.end())
+    {
+        _unix_socket = j["unix_socket"].get<std::string>();
+    }
+    else
+    {
+        _is_ok = false;
+    }
+
     // get log backends
     if (j.find("logbackends") != j.end())
     {

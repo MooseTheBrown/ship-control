@@ -10,6 +10,7 @@
         "REL_Y+": "TURN_RIGHT",
         "REL_X-": "TURN_LEFT"
     },
+    "unix_socket" : "/tmp/scsocket",
     "logbackends": ["console", "syslog"],
     "loglevel": "notice"
 }

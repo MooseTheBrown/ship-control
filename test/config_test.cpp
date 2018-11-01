@@ -65,6 +65,9 @@ TEST(Config, ConfigTest)
     ASSERT_EQ(2, steering[0]);
     ASSERT_EQ(6, steering[1]);
 
+    std::string unix_socket = config.get_unix_socket_name();
+    ASSERT_EQ("/tmp/scsocket", unix_socket);
+
     std::vector<sc::LogBackendType> log_backends = config.get_log_backends();
     ASSERT_EQ(2, log_backends.size());
     ASSERT_EQ(sc::LogBackendType::CONSOLE, log_backends[0]);

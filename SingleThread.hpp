@@ -18,42 +18,35 @@
  *
  */
 
-#ifndef EVDEV_READER_HPP
-#define EVDEV_READER_HPP
+#ifndef SINGLETHREAD_HPP
+#define SINGLETHREAD_HPP
 
-#include "EvdevConfig.hpp"
-#include "Log.hpp"
-#include "SingleThread.hpp"
-#include <linux/input.h>
-#include <string>
 #include <thread>
 
 namespace shipcontrol
 {
 
-class EvdevReader : public SingleThread
+// class, which manages single thread for execution of some background task
+class SingleThread
 {
 public:
-    EvdevReader(EvdevConfig &config,
-                const std::string &dev,
-                InputQueue &queue);
-    virtual ~EvdevReader();
+    SingleThread();
+    virtual ~SingleThread();
 
-    virtual void run();
+    void start();
+    void stop();
+
+    virtual void run() = 0;
+
 protected:
-    EvdevConfig &_config;
-    std::string _dev;
-    InputQueue &_queue;
-    Log *_log;
-    int _fd;
-    const key_map *_keymap;
-    const rel_map *_relmap;
+    void cleanup();
+    bool need_to_stop() { return _need_to_stop; }
 
-    void handle_event(input_event &event);
-    bool setup();
-    void teardown();
+private:
+    std::thread *_thread;
+    bool _need_to_stop;
 };
 
 } // namespace shipcontrol
 
-#endif // EVDEV_READER_HPP
+#endif // SINGLETHREAD_HPP

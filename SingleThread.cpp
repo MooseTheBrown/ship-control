@@ -18,42 +18,54 @@
  *
  */
 
-#ifndef EVDEV_READER_HPP
-#define EVDEV_READER_HPP
-
-#include "EvdevConfig.hpp"
-#include "Log.hpp"
 #include "SingleThread.hpp"
-#include <linux/input.h>
-#include <string>
-#include <thread>
+#include "Log.hpp"
+#include <functional>
 
 namespace shipcontrol
 {
 
-class EvdevReader : public SingleThread
+SingleThread::SingleThread()
+: _need_to_stop(false),
+  _thread(nullptr)
 {
-public:
-    EvdevReader(EvdevConfig &config,
-                const std::string &dev,
-                InputQueue &queue);
-    virtual ~EvdevReader();
+}
 
-    virtual void run();
-protected:
-    EvdevConfig &_config;
-    std::string _dev;
-    InputQueue &_queue;
-    Log *_log;
-    int _fd;
-    const key_map *_keymap;
-    const rel_map *_relmap;
+SingleThread::~SingleThread()
+{
+}
 
-    void handle_event(input_event &event);
-    bool setup();
-    void teardown();
-};
+void SingleThread::start()
+{
+    if (_thread == nullptr)
+    {
+        _thread = new std::thread(&SingleThread::run, this);
+    }
+}
+
+void SingleThread::stop()
+{
+    if (_thread != nullptr)
+    {
+        _need_to_stop = true;
+        _thread->join();
+        cleanup();
+    }
+}
+
+void SingleThread::cleanup()
+{
+    if (_thread != nullptr)
+    {
+        if (_thread->joinable())
+        {
+            // the thread is about to stop, so detach and destroy the thread object
+            _thread->detach();
+        }
+        delete _thread;
+        _thread = nullptr;
+        _need_to_stop = false;
+    }
+}
 
 } // namespace shipcontrol
-
-#endif // EVDEV_READER_HPP

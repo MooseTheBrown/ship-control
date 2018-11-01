@@ -18,42 +18,19 @@
  *
  */
 
-#ifndef EVDEV_READER_HPP
-#define EVDEV_READER_HPP
+#ifndef IPCCONFIG_HPP
+#define IPCCONFIG_HPP
 
-#include "EvdevConfig.hpp"
-#include "Log.hpp"
-#include "SingleThread.hpp"
-#include <linux/input.h>
 #include <string>
-#include <thread>
 
 namespace shipcontrol
 {
 
-class EvdevReader : public SingleThread
+class IPCConfig
 {
-public:
-    EvdevReader(EvdevConfig &config,
-                const std::string &dev,
-                InputQueue &queue);
-    virtual ~EvdevReader();
-
-    virtual void run();
-protected:
-    EvdevConfig &_config;
-    std::string _dev;
-    InputQueue &_queue;
-    Log *_log;
-    int _fd;
-    const key_map *_keymap;
-    const rel_map *_relmap;
-
-    void handle_event(input_event &event);
-    bool setup();
-    void teardown();
+    virtual std::string get_unix_socket_name() = 0;
 };
 
 } // namespace shipcontrol
 
-#endif // EVDEV_READER_HPP
+#endif // IPCCONFIG_HPP 

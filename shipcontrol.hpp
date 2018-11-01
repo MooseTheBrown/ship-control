@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016 Mikhail Sapozhnikov
+ * Copyright (C) 2016 - 2018 Mikhail Sapozhnikov
  *
  * This file is part of ship-control.
  *
@@ -27,6 +27,7 @@
 #include "MaestroController.hpp"
 #include "ConsoleLog.hpp"
 #include "SysLog.hpp"
+#include "DataProvider.hpp"
 
 namespace shipcontrol
 {
@@ -38,13 +39,17 @@ namespace shipcontrol
 
 #define PSMOVEINPUT_DEVICE_NAME     "psmoveinput"
 
-class ShipControl
+class ShipControl : public DataProvider
 {
 public:
     ShipControl();
     virtual ~ShipControl();
 
     int run();
+
+    // DataProvider implementation
+    virtual SpeedVal get_speed() { return _speed; }
+    virtual SteeringVal get_steering() { return _steering; }
 
 protected:
     Config *_config;
@@ -55,6 +60,8 @@ protected:
     Log *_log;
     ConsoleLog _clog;
     SysLog _syslog;
+    SpeedVal _speed;
+    SteeringVal _steering;
 
     int init();
     void find_input_device(const char *input_name, std::string &result);

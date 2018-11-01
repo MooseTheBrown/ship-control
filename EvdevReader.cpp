@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016 Mikhail Sapozhnikov
+ * Copyright (C) 2016 - 2018 Mikhail Sapozhnikov
  *
  * This file is part of ship-control.
  *
@@ -37,9 +37,7 @@ EvdevReader::EvdevReader(EvdevConfig &config,
 : _config(config),
   _dev(dev),
   _queue(queue),
-  _thread(nullptr),
-  _fd(-1),
-  _need_to_stop(false)
+  _fd(-1)
 {
     _log = Log::getInstance();
     _keymap = config.get_keymap();
@@ -51,50 +49,19 @@ EvdevReader::~EvdevReader()
     Log::release();
 }
 
-void EvdevReader::start()
-{
-    if (_thread == nullptr)
-    {
-        _thread = new std::thread(&EvdevReader::run, this);
-    }
-}
-
-void EvdevReader::stop()
-{
-    if (_thread != nullptr)
-    {
-        _need_to_stop = true;
-        _thread->join();
-        cleanup();
-    }
-
-}
-
 void EvdevReader::run()
 {
-    _fd = open(_dev.c_str(), O_RDONLY | O_NONBLOCK);
-
-    if (_fd == -1)
+    if (setup() != true)
     {
-        _log->write(LogLevel::ERROR, "EvdevReader failed to open device %s, error code %d\n",
-                    _dev.c_str(), errno);
-        cleanup();
-        return;
-    }
-
-    if (ioctl(_fd, EVIOCGRAB, (void*)1))
-    {
-        _log->write(LogLevel::ERROR, "EvdevReader failed to grab device %s, error code %d\n",
-                    _dev.c_str(), errno);
-        cleanup();
+        teardown();
         return;
     }
 
     while (true)
     {
-        if (_need_to_stop == true)
+        if (need_to_stop() == true)
         {
-            return;
+            break;
         }
 
         input_event events[EVENTS_AT_ONCE];
@@ -110,7 +77,7 @@ void EvdevReader::run()
             {
                 _log->write(LogLevel::ERROR, "EvdevReader failed to read, error code %d\n",
                             errno);
-                cleanup();
+                teardown();
                 return;
             }
         }
@@ -143,23 +110,35 @@ void EvdevReader::handle_event(input_event &event)
     }
 }
 
-void EvdevReader::cleanup()
+bool EvdevReader::setup()
+{
+    _fd = open(_dev.c_str(), O_RDONLY | O_NONBLOCK);
+
+    if (_fd == -1)
+    {
+        _log->write(LogLevel::ERROR, "EvdevReader failed to open device %s, error code %d\n",
+                    _dev.c_str(), errno);
+        teardown();
+        return false;
+    }
+
+    if (ioctl(_fd, EVIOCGRAB, (void*)1))
+    {
+        _log->write(LogLevel::ERROR, "EvdevReader failed to grab device %s, error code %d\n",
+                    _dev.c_str(), errno);
+        teardown();
+        return false;
+    }
+
+    return true;
+}
+
+void EvdevReader::teardown()
 {
     if (_fd != -1)
     {
         ioctl(_fd, EVIOCGRAB, (void*)0);
         close(_fd);
-    }
-    if (_thread != nullptr)
-    {
-        if (_thread->joinable())
-        {
-            // the thread is about to stop, so detach and destroy the thread object
-            _thread->detach();
-        }
-        delete _thread;
-        _thread = nullptr;
-        _need_to_stop = false;
     }
 }
 

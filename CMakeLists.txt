@@ -45,6 +45,8 @@ set (SHIPCONTROL_SRC Log.cpp
                      EvdevConfig.cpp
                      Config.cpp
                      IPCRequestHandler.cpp
+                     SingleThread.cpp
+                     UnixListener.cpp
                      shipcontrol.cpp)
 add_executable (ship-control ${SHIPCONTROL_SRC} main.cpp)
 

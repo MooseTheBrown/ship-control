@@ -23,6 +23,7 @@
 
 #include "EvdevConfig.hpp"
 #include "MaestroConfig.hpp"
+#include "IPCConfig.hpp"
 #include "Log.hpp"
 #include <string>
 #include <vector>
@@ -33,7 +34,8 @@ namespace shipcontrol
 
 // json-based configuration provider
 class Config : public EvdevConfig,
-               public MaestroConfig
+               public MaestroConfig,
+               public IPCConfig
 {
 public:
     Config(const std::string &filename);
@@ -46,6 +48,8 @@ public:
     virtual const char *get_maestro_dev() { return _maestro_dev.c_str(); }
     virtual std::vector<int> get_engine_channels() { return _engines; }
     virtual std::vector<int> get_steering_channels() { return _steering; }
+    // IPCConfig
+    virtual std::string get_unix_socket_name() { return _unix_socket; }
     // general configuration
     std::vector<LogBackendType> get_log_backends() { return _logBackends; }
     LogLevel get_log_level() { return _logLevel; }
@@ -62,6 +66,7 @@ protected:
     std::unordered_map<std::string, InputEvent> _evtstring_map;
     key_map _keymap;
     rel_map _relmap;
+    std::string _unix_socket;
     std::vector<LogBackendType> _logBackends;
     LogLevel _logLevel;
 
