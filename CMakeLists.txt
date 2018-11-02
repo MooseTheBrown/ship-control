@@ -47,6 +47,7 @@ set (SHIPCONTROL_SRC Log.cpp
                      IPCRequestHandler.cpp
                      SingleThread.cpp
                      UnixListener.cpp
+                     IPCClient.cpp
                      shipcontrol.cpp)
 add_executable (ship-control ${SHIPCONTROL_SRC} main.cpp)
 

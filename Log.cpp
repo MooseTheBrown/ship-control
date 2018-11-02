@@ -73,13 +73,13 @@ void Log::write(LogLevel level, const char *fmt, ...)
 {
     if (level >= _level)
     {
-        va_list args;
-        va_start(args, fmt);
         for (LogBackend *backend : _backends)
         {
+            va_list args;
+            va_start(args, fmt);
             backend->write(fmt, args);
+            va_end(args);
         }
-        va_end(args);
     }
 }
 

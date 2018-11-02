@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016 Mikhail Sapozhnikov
+ * Copyright (C) 2016 - 2018 Mikhail Sapozhnikov
  *
  * This file is part of ship-control.
  *
@@ -18,44 +18,35 @@
  *
  */
 
-#ifndef INPUT_QUEUE_HPP
-#define INPUT_QUEUE_HPP
+#ifndef IPCCLIENT_HPP
+#define IPCCLIENT_HPP
 
-#include <queue>
-#include <mutex>
-#include <condition_variable>
+#include "SingleThread.hpp"
+#include "Log.hpp"
+#include "IPCRequestHandler.hpp"
 
 namespace shipcontrol
 {
 
-enum class InputEvent
-{
-    UNKNOWN,
-    TURN_RIGHT,
-    TURN_LEFT,
-    SPEED_UP,
-    SPEED_DOWN
-};
-
-// a thread-safe queue of input events
-class InputQueue
+class IPCClient : public SingleThread
 {
 public:
-    InputQueue();
-    virtual ~InputQueue();
+    IPCClient(int fd, IPCRequestHandler &handler);
+    IPCClient(const IPCClient &other) = delete;
+    virtual ~IPCClient();
 
-    void push(InputEvent event);
-    InputEvent pop();
-    // pop_blocking blocks the calling thread until there's data in the queue
-    InputEvent pop_blocking();
-    bool is_empty();
+    virtual void run();
 protected:
-    std::queue<InputEvent> _queue;
-    std::mutex _queue_mutex;
-    std::mutex _block_mutex;
-    std::condition_variable _block_var;
+    void teardown();
+
+    const int BUFSIZE = 4096;
+
+    int _fd;
+    unsigned char *_buf;
+    Log *_log;
+    IPCRequestHandler &_rq_handler;
 };
 
 } // namespace shipcontrol
 
-#endif // INPUT_QUEUE_HPP
+#endif // IPCCLIENT_HPP

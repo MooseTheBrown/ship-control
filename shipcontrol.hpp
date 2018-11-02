@@ -28,6 +28,7 @@
 #include "ConsoleLog.hpp"
 #include "SysLog.hpp"
 #include "DataProvider.hpp"
+#include "UnixListener.hpp"
 
 namespace shipcontrol
 {
@@ -62,6 +63,8 @@ protected:
     SysLog _syslog;
     SpeedVal _speed;
     SteeringVal _steering;
+    IPCRequestHandler *_ipcHandler;
+    UnixListener *_unixListener;
 
     int init();
     void find_input_device(const char *input_name, std::string &result);

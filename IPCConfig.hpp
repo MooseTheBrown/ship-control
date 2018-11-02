@@ -28,6 +28,7 @@ namespace shipcontrol
 
 class IPCConfig
 {
+public:
     virtual std::string get_unix_socket_name() = 0;
 };
 

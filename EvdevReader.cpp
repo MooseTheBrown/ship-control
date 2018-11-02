@@ -139,6 +139,7 @@ void EvdevReader::teardown()
     {
         ioctl(_fd, EVIOCGRAB, (void*)0);
         close(_fd);
+        _fd = -1;
     }
 }
 

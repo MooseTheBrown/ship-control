@@ -39,10 +39,11 @@ ShipControl::ShipControl() :
     _evdevReader(nullptr),
     _controller(nullptr),
     _speed(SpeedVal::STOP),
-    _steering(SteeringVal::STRAIGHT)
+    _steering(SteeringVal::STRAIGHT),
+    _ipcHandler(nullptr),
+    _unixListener(nullptr)
 {
     _log = Log::getInstance();
-    _log->add_backend(&_syslog);
 }
 
 ShipControl::~ShipControl()
@@ -59,6 +60,14 @@ ShipControl::~ShipControl()
     {
         delete _controller;
     }
+    if (_ipcHandler != nullptr)
+    {
+        delete _ipcHandler;
+    }
+    if (_unixListener != nullptr)
+    {
+        delete _unixListener;
+    }
     Log::release();
 }
 
@@ -72,6 +81,7 @@ int ShipControl::run()
     }
 
     _evdevReader->start();
+    _unixListener->start();
 
     // event handling loop
     while (true)
@@ -102,6 +112,7 @@ int ShipControl::run()
     }
 
     _evdevReader->stop();
+    _unixListener->stop();
 
     return RETVAL_OK;
 }
@@ -114,6 +125,8 @@ int ShipControl::init()
     {
         return RETVAL_INVALID_CONFIG;
     }
+
+    setup_signals();
 
     // configure logging
     std::vector<LogBackendType> log_backends = _config->get_log_backends();
@@ -138,6 +151,10 @@ int ShipControl::init()
     _controller = new MaestroController(*_config);
     _speed = _controller->get_speed();
     _steering = _controller->get_steering();
+
+    // initialize Unix socket listener
+    _ipcHandler = new IPCRequestHandler(_inputQueue, *this);
+    _unixListener = new UnixListener(*_config, *_ipcHandler);
 
     return RETVAL_OK;
 }
@@ -490,6 +507,14 @@ void ShipControl::setup_signals()
     sigaction(SIGINT, &act, nullptr);
     sigaction(SIGQUIT, &act, nullptr);
     sigaction(SIGTERM, &act, nullptr);
+
+    // ignore SIGPIPE
+    struct sigaction ignore_act;
+    std::memset(static_cast<void *>(&ignore_act), 0, sizeof(struct sigaction));
+    ignore_act.sa_handler = SIG_IGN;
+    ignore_act.sa_flags = 0;
+
+    sigaction(SIGPIPE, &ignore_act, nullptr);
 }
 
 static void signal_handler(int sig)

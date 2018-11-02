@@ -24,6 +24,9 @@
 #include "IPCConfig.hpp"
 #include "Log.hpp"
 #include "SingleThread.hpp"
+#include "IPCRequestHandler.hpp"
+#include "IPCClient.hpp"
+#include <vector>
 
 namespace shipcontrol
 {
@@ -31,13 +34,20 @@ namespace shipcontrol
 class UnixListener : public SingleThread
 {
 public:
-    UnixListener(IPCConfig &config);
+    UnixListener(IPCConfig &config, IPCRequestHandler &handler);
     virtual ~UnixListener();
 
     virtual void run();
 protected:
+    bool setup();
+    void teardown();
+
     Log *_log;
     IPCConfig& _config;
+    std::string _socket_name;
+    int _fd;
+    IPCRequestHandler &_rq_handler;
+    std::vector<IPCClient *> _cl_handlers;
 };
 
 } // namespace shipcontrol

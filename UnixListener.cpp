@@ -19,23 +19,113 @@
  */
 
 #include "UnixListener.hpp"
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <sys/un.h>
+#include <unistd.h>
+#include <cstring>
 
 namespace shipcontrol
 {
 
-UnixListener::UnixListener(IPCConfig &config)
-: _config(config)
+UnixListener::UnixListener(IPCConfig &config, IPCRequestHandler &handler)
+: _config(config),
+  _fd(-1),
+  _rq_handler(handler)
 {
     _log = Log::getInstance();
+    _socket_name = _config.get_unix_socket_name();
 }
 
 UnixListener::~UnixListener()
 {
     Log::release();
+    for (IPCClient *cl : _cl_handlers)
+    {
+        delete cl;
+    }
 }
 
 void UnixListener::run()
 {
+    _log->write(LogLevel::DEBUG, "UnixListener::run()\n");
+
+    if (setup() != true)
+    {
+        teardown();
+        return;
+    }
+
+    while (true)
+    {
+        if (need_to_stop() == true)
+        {
+            break;
+        }
+
+        int clientsock = accept(_fd, nullptr, nullptr);
+        if (clientsock == -1)
+        {
+            _log->write(LogLevel::ERROR, "UnixListener failed to accept connection, error code %d", errno);
+            continue;
+        }
+
+        // handle data exchange in a separate client thread, here we just listen for new connections
+        IPCClient *client = new IPCClient(clientsock, _rq_handler);
+        _cl_handlers.push_back(client);
+        client->start();
+    }
+
+    teardown();
+}
+
+bool UnixListener::setup()
+{
+    _log->write(LogLevel::DEBUG, "UnixListener::setup()\n");
+
+    _fd = socket(AF_UNIX, SOCK_STREAM, 0);
+    if (_fd == -1)
+    {
+        _log->write(LogLevel::ERROR, "UnixListener failed to open socket, error code %d\n", errno);
+        return false;
+    }
+    sockaddr_un addr;
+    std::memset(&addr, 0, sizeof(sockaddr_un));
+    addr.sun_family = AF_UNIX;
+    std::strncpy(addr.sun_path, _socket_name.c_str(), sizeof(addr.sun_path) - 1);
+
+    _log->write(LogLevel::DEBUG, "UnixListener opening Unix socket %s\n", addr.sun_path);
+
+    if (bind(_fd, reinterpret_cast<const sockaddr *>(&addr), sizeof(sockaddr_un)) == -1)
+    {
+        _log->write(LogLevel::ERROR, "UnixListener failed to bind socket, error code %d\n", errno);
+        return false;
+    }
+
+    if (listen(_fd, 32) == -1)
+    {
+        _log->write(LogLevel::ERROR, "UnixListener failed to listen socket, error code %d\n", errno);
+        return false;
+    }
+
+    return true;
+}
+
+void UnixListener::teardown()
+{
+    _log->write(LogLevel::DEBUG, "UnixListener::stop()\n");
+
+    for (IPCClient *cl : _cl_handlers)
+    {
+        cl->stop();
+    }
+
+    if (_fd != -1)
+    {
+        close(_fd);
+        _fd = -1;
+        unlink(_socket_name.c_str());
+    }
 }
 
 } // namespace shipcontrol
