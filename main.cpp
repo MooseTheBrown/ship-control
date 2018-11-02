@@ -20,7 +20,7 @@
 
 #include "shipcontrol.hpp"
 
-shipcontrol::ShipControl *theControl;
+static shipcontrol::ShipControl *theControl;
 
 int main(int argc, char **argv)
 {
