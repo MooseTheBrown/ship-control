@@ -27,12 +27,10 @@
 #include <unistd.h>
 #include <cstring>
 
+extern void signal_handler(int sig);
+
 namespace shipcontrol
 {
-
-static void signal_handler(int sig);
-
-static bool stop = false;
 
 ShipControl::ShipControl() :
     _config(nullptr),
@@ -41,7 +39,8 @@ ShipControl::ShipControl() :
     _speed(SpeedVal::STOP),
     _steering(SteeringVal::STRAIGHT),
     _ipcHandler(nullptr),
-    _unixListener(nullptr)
+    _unixListener(nullptr),
+    _stop(false)
 {
     _log = Log::getInstance();
 }
@@ -86,7 +85,7 @@ int ShipControl::run()
     // event handling loop
     while (true)
     {
-        if (stop)
+        if (_stop)
         {
             break;
         }
@@ -157,6 +156,13 @@ int ShipControl::init()
     _unixListener = new UnixListener(*_config, *_ipcHandler);
 
     return RETVAL_OK;
+}
+
+void ShipControl::interrupt()
+{
+    _stop = true;
+    // push dummy event to the input queue, so that run() could detect stop flag
+    _inputQueue.push(InputEvent::UNKNOWN);
 }
 
 void ShipControl::find_input_device(const char *input_name, std::string &result)
@@ -515,11 +521,6 @@ void ShipControl::setup_signals()
     ignore_act.sa_flags = 0;
 
     sigaction(SIGPIPE, &ignore_act, nullptr);
-}
-
-static void signal_handler(int sig)
-{
-    stop = true;
 }
 
 } // namespace shipcontrol

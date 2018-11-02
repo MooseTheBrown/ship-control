@@ -75,7 +75,7 @@ void EvdevReader::run()
             }
             else
             {
-                _log->write(LogLevel::ERROR, "EvdevReader failed to read, error code %d\n",
+                _log->write(LogLevel::NOTICE, "EvdevReader failed to read, error code %d\n",
                             errno);
                 teardown();
                 return;
@@ -86,6 +86,12 @@ void EvdevReader::run()
             handle_event(events[i]);
         }
     }
+}
+
+void EvdevReader::stop()
+{
+    teardown();
+    SingleThread::stop();
 }
 
 void EvdevReader::handle_event(input_event &event)

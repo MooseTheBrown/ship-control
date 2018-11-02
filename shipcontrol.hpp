@@ -47,6 +47,7 @@ public:
     virtual ~ShipControl();
 
     int run();
+    void interrupt();
 
     // DataProvider implementation
     virtual SpeedVal get_speed() { return _speed; }
@@ -65,6 +66,7 @@ protected:
     SteeringVal _steering;
     IPCRequestHandler *_ipcHandler;
     UnixListener *_unixListener;
+    bool _stop;
 
     int init();
     void find_input_device(const char *input_name, std::string &result);

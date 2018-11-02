@@ -48,7 +48,6 @@ void SingleThread::stop()
     if (_thread != nullptr)
     {
         _need_to_stop = true;
-        _thread->join();
         cleanup();
     }
 }

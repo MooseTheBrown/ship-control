@@ -36,6 +36,7 @@ public:
     virtual ~IPCClient();
 
     virtual void run();
+    virtual void stop();
 protected:
     void teardown();
 

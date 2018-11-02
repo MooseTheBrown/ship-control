@@ -33,8 +33,8 @@ public:
     SingleThread();
     virtual ~SingleThread();
 
-    void start();
-    void stop();
+    virtual void start();
+    virtual void stop();
 
     virtual void run() = 0;
 

@@ -20,9 +20,17 @@
 
 #include "shipcontrol.hpp"
 
+shipcontrol::ShipControl *theControl;
+
 int main(int argc, char **argv)
 {
-    shipcontrol::ShipControl control;
-    int ret = control.run();
+    theControl = new shipcontrol::ShipControl();
+    int ret = theControl->run();
+    delete theControl;
     return ret;
+}
+
+void signal_handler(int sig)
+{
+    theControl->interrupt();
 }

@@ -68,8 +68,12 @@ void IPCClient::run()
             break;
         }
     }
+}
 
+void IPCClient::stop()
+{
     teardown();
+    SingleThread::stop();
 }
 
 void IPCClient::teardown()

@@ -38,6 +38,7 @@ public:
     virtual ~UnixListener();
 
     virtual void run();
+    virtual void stop();
 protected:
     bool setup();
     void teardown();

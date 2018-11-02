@@ -66,7 +66,7 @@ void UnixListener::run()
         int clientsock = accept(_fd, nullptr, nullptr);
         if (clientsock == -1)
         {
-            _log->write(LogLevel::ERROR, "UnixListener failed to accept connection, error code %d", errno);
+            _log->write(LogLevel::NOTICE, "UnixListener failed to accept connection, error code %d", errno);
             continue;
         }
 
@@ -75,8 +75,12 @@ void UnixListener::run()
         _cl_handlers.push_back(client);
         client->start();
     }
+}
 
+void UnixListener::stop()
+{
     teardown();
+    SingleThread::stop();
 }
 
 bool UnixListener::setup()

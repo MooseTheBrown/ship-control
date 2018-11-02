@@ -40,6 +40,7 @@ public:
     virtual ~EvdevReader();
 
     virtual void run();
+    virtual void stop();
 protected:
     EvdevConfig &_config;
     std::string _dev;
