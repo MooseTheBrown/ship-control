@@ -63,6 +63,7 @@ TestEvdevConfig::TestEvdevConfig()
 class EvdevTest : public ::testing::Test
 {
 public:
+    EvdevTest();
     virtual void SetUp();
     virtual void TearDown();
 protected:
@@ -77,6 +78,11 @@ protected:
     void find_device();
 };
 
+EvdevTest::EvdevTest()
+: _reader(nullptr)
+{
+}
+
 void EvdevTest::SetUp()
 {
     _log = sc::Log::getInstance();
@@ -87,6 +93,7 @@ void EvdevTest::SetUp()
     if (_fd < 0)
     {
         std::cout << "Failed to open /dev/uinput" << std::endl;
+        ASSERT_TRUE(false);
         return;
     }
 
@@ -111,10 +118,19 @@ void EvdevTest::SetUp()
 
 void EvdevTest::TearDown()
 {
-    _reader->stop();
-    delete _reader;
-    ioctl(_fd, UI_DEV_DESTROY);
-    close(_fd);
+    if (_reader != nullptr)
+    {
+        _reader->stop();
+        // let evdev reader finish its shutdown
+        std::this_thread::sleep_for(std::chrono::milliseconds(300));
+        delete _reader;
+    }
+    if (_fd > 0)
+    {
+        ioctl(_fd, UI_DEV_DESTROY);
+        close(_fd);
+    }
+    sc::Log::release();
 }
 
 // find device, which has been created through uinput in SetUp()

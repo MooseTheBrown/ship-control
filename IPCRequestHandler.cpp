@@ -18,6 +18,7 @@
  *
  */
 
+#include <stdexcept>
 #include "IPCRequestHandler.hpp"
 #include "json.hpp"
 
@@ -34,9 +35,10 @@ IPCRequestHandler::IPCRequestHandler(InputQueue &queue, DataProvider &provider)
 
 std::string IPCRequestHandler::handleRequest(const std::string &request)
 {
-    json json_rq = json::parse(request);
+    try
+    {
+        json json_rq = json::parse(request);
 
-    try {
         if (json_rq.find("type") != json_rq.end())
         {
             std::string rq_type = json_rq["type"].get<std::string>();
@@ -49,7 +51,7 @@ std::string IPCRequestHandler::handleRequest(const std::string &request)
                 }
                 else
                 {
-                    throw std::string("no command inside command request");
+                    throw std::invalid_argument("no command inside command request");
                 }
             }
             else if (rq_type == "query")
@@ -58,20 +60,20 @@ std::string IPCRequestHandler::handleRequest(const std::string &request)
             }
             else
             {
-                throw std::string("invalid request type");
+                throw std::invalid_argument("invalid request type");
             }
         }
         else
         {
-            throw std::string("invalid request message, request type not found");
+            throw std::invalid_argument("invalid request message, request type not found");
         }
     }
-    catch (const std::string &e)
+    catch (const std::exception &e)
     {
         json json_resp;
 
         json_resp["status"] = "fail";
-        json_resp["error"] = e;
+        json_resp["error"] = e.what();
 
         return json_resp.dump();
     }

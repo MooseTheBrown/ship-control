@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016 Mikhail Sapozhnikov
+ * Copyright (C) 2016 - 2018 Mikhail Sapozhnikov
  *
  * This file is part of ship-control.
  *
@@ -87,13 +87,13 @@ void Log::write(const char *fmt, ...)
 {
     if (LogLevel::NOTICE >= _level)
     {
-        va_list args;
-        va_start(args, fmt);
         for (LogBackend *backend : _backends)
         {
+            va_list args;
+            va_start(args, fmt);
             backend->write(fmt, args);
+            va_end(args);
         }
-        va_end(args);
     }
 }
 

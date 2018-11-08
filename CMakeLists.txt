@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2016 Mikhail Sapozhnikov
+# Copyright (C) 2016 - 2018 Mikhail Sapozhnikov
 #
 # This file is part of ship-control.
 #
@@ -60,6 +60,7 @@ if (BUILD_TESTS)
                    test/maestro_test.cpp
                    test/evdev_test.cpp
                    test/ipc_handler_test.cpp
+                   test/unsock_test.cpp
                    test/config_test.cpp)
     find_library (GTEST_LIB NAMES gtest)
     if (${GTEST_LIB} EQUAL "GTEST_LIB-NOTFOUND")

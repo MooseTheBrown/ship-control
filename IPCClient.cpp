@@ -56,7 +56,7 @@ void IPCClient::run()
         int len = read(_fd, reinterpret_cast<void *>(_buf), BUFSIZE);
         if (len == -1)
         {
-            _log->write(LogLevel::NOTICE, "IPCClient failed to read data from socket, error code %d", errno);
+            _log->write(LogLevel::NOTICE, "IPCClient failed to read data from socket, error code %d\n", errno);
             break;
         }
         _buf[len] = '\0';
