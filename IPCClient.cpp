@@ -64,7 +64,7 @@ void IPCClient::run()
 
         if (write(_fd, reinterpret_cast<const void *>(resp.c_str()), resp.length()) == -1)
         {
-            _log->write(LogLevel::NOTICE, "IPCClient failed to write data into socket, error code %d", errno);
+            _log->write(LogLevel::NOTICE, "IPCClient failed to write data into socket, error code %d\n", errno);
             break;
         }
     }

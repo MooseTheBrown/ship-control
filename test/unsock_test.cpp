@@ -39,6 +39,9 @@ namespace unsock_test
 #define TESTSOCKET_NAME "testsocket"
 #define READBUF_SIZE 4096
 
+void send_query();
+void send_command(const std::string &cmd);
+
 // client capable of sending messages and reading responses to/from Unix socket
 class UnsockClient
 {
@@ -171,10 +174,66 @@ void UnsockTest::TearDown()
 
 TEST_F(UnsockTest, Query)
 {
+    send_query();
+}
+
+TEST_F(UnsockTest, Command)
+{
+    send_command(std::string("turn_left"));
+    ASSERT_FALSE(_inputQueue.is_empty());
+    ASSERT_EQ(sc::InputEvent::TURN_LEFT, _inputQueue.pop());
+}
+
+// multithreaded query test
+TEST_F(UnsockTest, QueryMt)
+{
+    std::vector<std::thread *> threads;
+
+    for (int i = 0; i < 10; i++)
+    {
+        std::thread *thr = new std::thread(send_query);
+        threads.push_back(thr);
+    }
+
+    for (auto thr : threads)
+    {
+        thr->join();
+        delete thr;
+    }
+}
+
+// multithreaded command test
+TEST_F(UnsockTest, CommandMt)
+{
+    std::vector<std::thread *> threads;
+
+    for (int i = 0; i < 10; i++)
+    {
+        std::thread *thr = new std::thread(send_command, std::string("speed_up"));
+        threads.push_back(thr);
+    }
+
+    for (auto thr : threads)
+    {
+        thr->join();
+        delete thr;
+    }
+
+    ASSERT_FALSE(_inputQueue.is_empty());
+    for (int i = 0; i < 10; i++)
+    {
+        ASSERT_EQ(sc::InputEvent::SPEED_UP, _inputQueue.pop());
+    }
+}
+
+// send single query via unix socket and verify result
+void send_query()
+{
     UnsockClient client;
     json rq;
     json resp;
     std::string resp_str;
+    sc::Log *log = sc::Log::getInstance();
 
     client.connect();
 
@@ -188,37 +247,41 @@ TEST_F(UnsockTest, Query)
     }
     catch (std::invalid_argument &e)
     {
-        _log->write(sc::LogLevel::ERROR, "std::invalid_argument caught: %s\n", e.what());
-        _log->write(sc::LogLevel::DEBUG, "response string: %s\n", resp_str.c_str());
+        log->write(sc::LogLevel::ERROR, "std::invalid_argument caught: %s\n", e.what());
+        log->write(sc::LogLevel::DEBUG, "response string: %s\n", resp_str.c_str());
         ASSERT_TRUE(false);
     }
+
+    sc::Log::release();
 }
 
-TEST_F(UnsockTest, Command)
+// send single command via unix socket, verify that response status is "ok"
+void send_command(const std::string &cmd)
 {
     UnsockClient client;
     json rq;
     json resp;
     std::string resp_str;
+    sc::Log *log = sc::Log::getInstance();
 
     client.connect();
 
     try
     {
         rq["type"] = "cmd";
-        rq["cmd"] = "turn_left";
+        rq["cmd"] = cmd;
         resp_str = client.send_msg(rq.dump());
         resp = json::parse(resp_str);
         ASSERT_EQ("ok", resp["status"]);
-        ASSERT_FALSE(_inputQueue.is_empty());
-        ASSERT_EQ(sc::InputEvent::TURN_LEFT, _inputQueue.pop());
     }
     catch (std::invalid_argument &e)
     {
-        _log->write(sc::LogLevel::ERROR, "std::invalid_argument caught: %s\n", e.what());
-        _log->write(sc::LogLevel::DEBUG, "response string: %s\n", resp_str.c_str());
+        log->write(sc::LogLevel::ERROR, "std::invalid_argument caught: %s\n", e.what());
+        log->write(sc::LogLevel::DEBUG, "response string: %s\n", resp_str.c_str());
         ASSERT_TRUE(false);
     }
+
+    sc::Log::release();
 }
 
 } // namespace unsock_test

@@ -19,9 +19,20 @@
  */
 
 #include <gtest/gtest.h>
+#include <signal.h>
+#include <cstring>
 
 int main(int argc, char **argv)
 {
+    // ignore SIGPIPE
+    struct sigaction ignore_act;
+    std::memset(static_cast<void *>(&ignore_act), 0, sizeof(struct sigaction));
+    ignore_act.sa_handler = SIG_IGN;
+    ignore_act.sa_flags = 0;
+
+    sigaction(SIGPIPE, &ignore_act, nullptr);
+
+    // run the tests
     ::testing::InitGoogleTest(&argc, argv);
     return RUN_ALL_TESTS();
 }
