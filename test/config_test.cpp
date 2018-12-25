@@ -55,6 +55,14 @@ TEST(Config, ConfigTest)
     const char *maestro_dev = config.get_maestro_dev();
     ASSERT_STREQ("/dev/ttyACM3", maestro_dev);
 
+    sc::MaestroCalibration maestro_calibration = config.get_maestro_calibration();
+    ASSERT_EQ(2000, maestro_calibration.max_fwd);
+    ASSERT_EQ(1000, maestro_calibration.stop);
+    ASSERT_EQ(1, maestro_calibration.max_rev);
+    ASSERT_EQ(10000, maestro_calibration.straight);
+    ASSERT_EQ(5000, maestro_calibration.left_max);
+    ASSERT_EQ(15000, maestro_calibration.right_max);
+
     std::vector<int> engines = config.get_engine_channels();
     ASSERT_EQ(2, engines.size());
     ASSERT_EQ(1, engines[0]);

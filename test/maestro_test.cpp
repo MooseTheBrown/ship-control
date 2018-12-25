@@ -49,6 +49,18 @@ public:
         steering.push_back(3);
         return steering;
     }
+
+    virtual sc::MaestroCalibration get_maestro_calibration()
+    {
+        sc::MaestroCalibration calibration;
+        calibration.max_fwd = 8000;
+        calibration.stop = 5920;
+        calibration.max_rev = 3968;
+        calibration.straight = 6680;
+        calibration.left_max = 3968;
+        calibration.right_max = 9344;
+        return calibration;
+    }
 };
 
 // fixture

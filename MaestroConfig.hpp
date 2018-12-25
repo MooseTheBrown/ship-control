@@ -26,6 +26,16 @@
 namespace shipcontrol
 {
 
+struct MaestroCalibration
+{
+    int max_fwd;
+    int stop;
+    int max_rev;
+    int straight;
+    int left_max;
+    int right_max;
+};
+
 // Maestro controller configuration provider
 class MaestroConfig
 {
@@ -33,8 +43,9 @@ public:
     virtual const char *get_maestro_dev() = 0;
     virtual std::vector<int> get_engine_channels() = 0;
     virtual std::vector<int> get_steering_channels() = 0;
+    virtual MaestroCalibration get_maestro_calibration() = 0;
 };
 
-}
+} // namespace shipcontrol
 
 #endif // MAESTRO_CONFIG_HPP

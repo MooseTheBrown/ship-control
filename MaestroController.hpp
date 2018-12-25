@@ -45,6 +45,11 @@ protected:
     const char *_dev;
     std::vector<int> _engines;
     std::vector<int> _steering;
+    MaestroCalibration _calibration;
+    int _fwd_range;
+    int _rev_range;
+    int _right_range;
+    int _left_range;
     int _fd;
     Log *_log;
 

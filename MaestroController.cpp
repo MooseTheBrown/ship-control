@@ -31,24 +31,6 @@
 namespace shipcontrol
 {
 
-const int MAESTRO_MAX_FWD = 2000 * 4;
-const int MAESTRO_STOP = 1480 * 4;
-const int MAESTRO_MAX_REV = 992 * 4;
-
-const int MAESTRO_FWD_RANGE = MAESTRO_MAX_FWD - MAESTRO_STOP -
-                              ((MAESTRO_MAX_FWD - MAESTRO_STOP) % 10);
-const int MAESTRO_REV_RANGE = MAESTRO_STOP - MAESTRO_MAX_REV -
-                              ((MAESTRO_STOP - MAESTRO_MAX_REV) % 10);
-
-const int MAESTRO_STRAIGHT = 1670 * 4;
-const int MAESTRO_LEFT_MAX = 992 * 4;
-const int MAESTRO_RIGHT_MAX = 2336 * 4;
-
-const int MAESTRO_RIGHT_RANGE = MAESTRO_RIGHT_MAX - MAESTRO_STRAIGHT -
-                                ((MAESTRO_RIGHT_MAX - MAESTRO_STRAIGHT) % 10);
-const int MAESTRO_LEFT_RANGE = MAESTRO_STRAIGHT - MAESTRO_LEFT_MAX -
-                               ((MAESTRO_STRAIGHT - MAESTRO_LEFT_MAX) % 10);
-
 MaestroController::MaestroController(MaestroConfig &config) :
     _config(config),
     _dev(nullptr),
@@ -57,6 +39,15 @@ MaestroController::MaestroController(MaestroConfig &config) :
     _dev = _config.get_maestro_dev();
     _engines = _config.get_engine_channels();
     _steering = _config.get_steering_channels();
+    _calibration = _config.get_maestro_calibration();
+    _fwd_range = _calibration.max_fwd - _calibration.stop -
+                 ((_calibration.max_fwd - _calibration.stop) % 10);
+    _rev_range = _calibration.stop - _calibration.max_rev -
+                 ((_calibration.stop - _calibration.max_rev) % 10);
+    _right_range = _calibration.right_max - _calibration.straight -
+                   ((_calibration.right_max - _calibration.straight) % 10);
+    _left_range = _calibration.straight - _calibration.left_max -
+                  ((_calibration.straight - _calibration.left_max) % 10);
 
     _log = Log::getInstance();
 
@@ -172,54 +163,54 @@ int MaestroController::speed_to_int(SpeedVal speed)
     switch (speed)
     {
     case SpeedVal::STOP:
-        return MAESTRO_STOP;
+        return _calibration.stop;
     case SpeedVal::FWD10:
-        return MAESTRO_STOP + MAESTRO_FWD_RANGE / 10;
+        return _calibration.stop + _fwd_range / 10;
     case SpeedVal::FWD20:
-        return MAESTRO_STOP + (MAESTRO_FWD_RANGE / 10) * 2;
+        return _calibration.stop + (_fwd_range / 10) * 2;
     case SpeedVal::FWD30:
-        return MAESTRO_STOP + (MAESTRO_FWD_RANGE / 10) * 3;
+        return _calibration.stop + (_fwd_range / 10) * 3;
     case SpeedVal::FWD40:
-        return MAESTRO_STOP + (MAESTRO_FWD_RANGE / 10) * 4;
+        return _calibration.stop + (_fwd_range / 10) * 4;
     case SpeedVal::FWD50:
-        return MAESTRO_STOP + (MAESTRO_FWD_RANGE / 10) * 5;
+        return _calibration.stop + (_fwd_range / 10) * 5;
     case SpeedVal::FWD60:
-        return MAESTRO_STOP + (MAESTRO_FWD_RANGE / 10) * 6;
+        return _calibration.stop + (_fwd_range / 10) * 6;
     case SpeedVal::FWD70:
-        return MAESTRO_STOP + (MAESTRO_FWD_RANGE / 10) * 7;
+        return _calibration.stop + (_fwd_range / 10) * 7;
     case SpeedVal::FWD80:
-        return MAESTRO_STOP + (MAESTRO_FWD_RANGE / 10) * 8;
+        return _calibration.stop + (_fwd_range / 10) * 8;
     case SpeedVal::FWD90:
-        return MAESTRO_STOP + (MAESTRO_FWD_RANGE / 10) * 9;
+        return _calibration.stop + (_fwd_range / 10) * 9;
     case SpeedVal::FWD100:
-        return MAESTRO_MAX_FWD;
+        return _calibration.max_fwd;
     case SpeedVal::REV10:
-        return MAESTRO_STOP - MAESTRO_REV_RANGE / 10;
+        return _calibration.stop - _rev_range / 10;
     case SpeedVal::REV20:
-        return MAESTRO_STOP - (MAESTRO_REV_RANGE / 10) * 2;
+        return _calibration.stop - (_rev_range / 10) * 2;
     case SpeedVal::REV30:
-        return MAESTRO_STOP - (MAESTRO_REV_RANGE / 10) * 3;
+        return _calibration.stop - (_rev_range / 10) * 3;
     case SpeedVal::REV40:
-        return MAESTRO_STOP - (MAESTRO_REV_RANGE / 10) * 4;
+        return _calibration.stop - (_rev_range / 10) * 4;
     case SpeedVal::REV50:
-        return MAESTRO_STOP - (MAESTRO_REV_RANGE / 10) * 5;
+        return _calibration.stop - (_rev_range / 10) * 5;
     case SpeedVal::REV60:
-        return MAESTRO_STOP - (MAESTRO_REV_RANGE / 10) * 6;
+        return _calibration.stop - (_rev_range / 10) * 6;
     case SpeedVal::REV70:
-        return MAESTRO_STOP - (MAESTRO_REV_RANGE / 10) * 7;
+        return _calibration.stop - (_rev_range / 10) * 7;
     case SpeedVal::REV80:
-        return MAESTRO_STOP - (MAESTRO_REV_RANGE / 10) * 8;
+        return _calibration.stop - (_rev_range / 10) * 8;
     case SpeedVal::REV90:
-        return MAESTRO_STOP - (MAESTRO_REV_RANGE / 10) * 9;
+        return _calibration.stop - (_rev_range / 10) * 9;
     case SpeedVal::REV100:
-        return MAESTRO_MAX_REV;
+        return _calibration.max_rev;
     }
 }
 
 SpeedVal MaestroController::int_to_speed(int speed)
 {
     int val = 0;
-    int diff = speed - MAESTRO_STOP;
+    int diff = speed - _calibration.stop;
 
     if (diff == 0)
     {
@@ -229,12 +220,12 @@ SpeedVal MaestroController::int_to_speed(int speed)
     if (diff > 0)
     {
         // forward
-        val = (diff * 10) / MAESTRO_FWD_RANGE;
+        val = (diff * 10) / _fwd_range;
     }
     else
     {
         // reverse
-        val = (diff * 10) / MAESTRO_REV_RANGE;
+        val = (diff * 10) / _rev_range;
     }
 
     switch (val)
@@ -289,54 +280,54 @@ int MaestroController::steering_to_int(SteeringVal steering)
     switch (steering)
     {
     case SteeringVal::STRAIGHT:
-        return MAESTRO_STRAIGHT;
+        return _calibration.straight;
     case SteeringVal::RIGHT10:
-        return MAESTRO_STRAIGHT + (MAESTRO_RIGHT_RANGE / 10);
+        return _calibration.straight + (_right_range / 10);
     case SteeringVal::RIGHT20:
-        return MAESTRO_STRAIGHT + (MAESTRO_RIGHT_RANGE / 10) * 2;
+        return _calibration.straight + (_right_range / 10) * 2;
     case SteeringVal::RIGHT30:
-        return MAESTRO_STRAIGHT + (MAESTRO_RIGHT_RANGE / 10) * 3;
+        return _calibration.straight + (_right_range / 10) * 3;
     case SteeringVal::RIGHT40:
-        return MAESTRO_STRAIGHT + (MAESTRO_RIGHT_RANGE / 10) * 4;
+        return _calibration.straight + (_right_range / 10) * 4;
     case SteeringVal::RIGHT50:
-        return MAESTRO_STRAIGHT + (MAESTRO_RIGHT_RANGE / 10) * 5;
+        return _calibration.straight + (_right_range / 10) * 5;
     case SteeringVal::RIGHT60:
-        return MAESTRO_STRAIGHT + (MAESTRO_RIGHT_RANGE / 10) * 6;
+        return _calibration.straight + (_right_range / 10) * 6;
     case SteeringVal::RIGHT70:
-        return MAESTRO_STRAIGHT + (MAESTRO_RIGHT_RANGE / 10) * 7;
+        return _calibration.straight + (_right_range / 10) * 7;
     case SteeringVal::RIGHT80:
-        return MAESTRO_STRAIGHT + (MAESTRO_RIGHT_RANGE / 10) * 8;
+        return _calibration.straight + (_right_range / 10) * 8;
     case SteeringVal::RIGHT90:
-        return MAESTRO_STRAIGHT + (MAESTRO_RIGHT_RANGE / 10) * 9;
+        return _calibration.straight + (_right_range / 10) * 9;
     case SteeringVal::RIGHT100:
-        return MAESTRO_RIGHT_MAX;
+        return _calibration.right_max;
     case SteeringVal::LEFT10:
-        return MAESTRO_STRAIGHT - (MAESTRO_LEFT_RANGE / 10);
+        return _calibration.straight - (_left_range / 10);
     case SteeringVal::LEFT20:
-        return MAESTRO_STRAIGHT - (MAESTRO_LEFT_RANGE / 10) * 2;
+        return _calibration.straight - (_left_range / 10) * 2;
     case SteeringVal::LEFT30:
-        return MAESTRO_STRAIGHT - (MAESTRO_LEFT_RANGE / 10) * 3;
+        return _calibration.straight - (_left_range / 10) * 3;
     case SteeringVal::LEFT40:
-        return MAESTRO_STRAIGHT - (MAESTRO_LEFT_RANGE / 10) * 4;
+        return _calibration.straight - (_left_range / 10) * 4;
     case SteeringVal::LEFT50:
-        return MAESTRO_STRAIGHT - (MAESTRO_LEFT_RANGE / 10) * 5;
+        return _calibration.straight - (_left_range / 10) * 5;
     case SteeringVal::LEFT60:
-        return MAESTRO_STRAIGHT - (MAESTRO_LEFT_RANGE / 10) * 6;
+        return _calibration.straight - (_left_range / 10) * 6;
     case SteeringVal::LEFT70:
-        return MAESTRO_STRAIGHT - (MAESTRO_LEFT_RANGE / 10) * 7;
+        return _calibration.straight - (_left_range / 10) * 7;
     case SteeringVal::LEFT80:
-        return MAESTRO_STRAIGHT - (MAESTRO_LEFT_RANGE / 10) * 8;
+        return _calibration.straight - (_left_range / 10) * 8;
     case SteeringVal::LEFT90:
-        return MAESTRO_STRAIGHT - (MAESTRO_LEFT_RANGE / 10) * 9;
+        return _calibration.straight - (_left_range / 10) * 9;
     case SteeringVal::LEFT100:
-        return MAESTRO_LEFT_MAX;
+        return _calibration.left_max;
     }
 }
 
 SteeringVal MaestroController::int_to_steering(int steering)
 {
     int val = 0;
-    int diff = steering - MAESTRO_STRAIGHT;
+    int diff = steering - _calibration.straight;
 
     if (diff == 0)
     {
@@ -346,12 +337,12 @@ SteeringVal MaestroController::int_to_steering(int steering)
     if (diff > 0)
     {
         // right
-        val = (diff * 10) / MAESTRO_RIGHT_RANGE;
+        val = (diff * 10) / _right_range;
     }
     else
     {
         // left
-        val = (diff * 10) / MAESTRO_LEFT_RANGE;
+        val = (diff * 10) / _left_range;
     }
 
     switch (val)

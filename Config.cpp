@@ -21,6 +21,7 @@
 #include "Config.hpp"
 #include "json.hpp"
 #include <fstream>
+#include <cstring>
 #include <linux/input.h>
 
 using json = nlohmann::json;
@@ -170,6 +171,8 @@ Config::Config(const std::string &filename) :
     _evtstring_map.insert(std::make_pair("SPEED_UP", InputEvent::SPEED_UP));
     _evtstring_map.insert(std::make_pair("SPEED_DOWN", InputEvent::SPEED_DOWN));
 
+    std::memset(&_maestro_calibration, 0, sizeof(MaestroCalibration));
+
     // parse the config
     parse(filename);
 }
@@ -224,6 +227,40 @@ void Config::parse(const std::string &filename)
     {
         auto maestro_dev = j["maestro_device"];
         _maestro_dev = maestro_dev.get<std::string>();
+    }
+    else
+    {
+        _is_ok = false;
+    }
+
+    // get maestro calibration data
+    if (j.find("maestro_calibration") != j.end())
+    {
+        auto calibration = j["maestro_calibration"];
+        if (calibration.find("max_fwd") != calibration.end())
+        {
+            _maestro_calibration.max_fwd = calibration["max_fwd"].get<int>();
+        }
+        if (calibration.find("stop") != calibration.end())
+        {
+            _maestro_calibration.stop = calibration["stop"].get<int>();
+        }
+        if (calibration.find("max_rev") != calibration.end())
+        {
+            _maestro_calibration.max_rev = calibration["max_rev"].get<int>();
+        }
+        if (calibration.find("straight") != calibration.end())
+        {
+            _maestro_calibration.straight = calibration["straight"].get<int>();
+        }
+        if (calibration.find("left_max") != calibration.end())
+        {
+            _maestro_calibration.left_max = calibration["left_max"].get<int>();
+        }
+        if (calibration.find("right_max") != calibration.end())
+        {
+            _maestro_calibration.right_max = calibration["right_max"].get<int>();
+        }
     }
     else
     {
