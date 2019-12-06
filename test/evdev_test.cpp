@@ -68,7 +68,6 @@ public:
     virtual void TearDown();
 protected:
     sc::Log *_log;
-    sc::ConsoleLog _clog;
     int _fd;
     std::string _device;
     sc::EvdevReader *_reader;
@@ -86,7 +85,6 @@ EvdevTest::EvdevTest()
 void EvdevTest::SetUp()
 {
     _log = sc::Log::getInstance();
-    _log->add_backend(&_clog);
     _log->set_level(sc::LogLevel::DEBUG);
 
     _fd = open("/dev/uinput", O_WRONLY);

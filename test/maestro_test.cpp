@@ -35,30 +35,30 @@ class TestMaestroConfig : public sc::MaestroConfig
 public:
     virtual const char *get_maestro_dev() { return "/dev/ttyACM0"; }
 
-    virtual std::vector<int> get_engine_channels()
+    virtual std::vector<sc::MaestroEngine> get_engine_channels()
     {
-        std::vector<int> engines;
-        engines.push_back(0);
-        engines.push_back(5);
+        std::vector<sc::MaestroEngine> engines;
+        engines.push_back(sc::MaestroEngine{0, true});
+        engines.push_back(sc::MaestroEngine{1, false});
         return engines;
     }
 
     virtual std::vector<int> get_steering_channels()
     {
         std::vector<int> steering;
-        steering.push_back(3);
+        steering.push_back(4);
         return steering;
     }
 
     virtual sc::MaestroCalibration get_maestro_calibration()
     {
         sc::MaestroCalibration calibration;
-        calibration.max_fwd = 8000;
-        calibration.stop = 5920;
-        calibration.max_rev = 3968;
-        calibration.straight = 6680;
-        calibration.left_max = 3968;
-        calibration.right_max = 9344;
+        calibration.max_fwd = 2304;
+        calibration.stop = 1504;
+        calibration.max_rev = 704;
+        calibration.straight = 1700;
+        calibration.left_max = 896;
+        calibration.right_max = 2474;
         return calibration;
     }
 };
@@ -70,7 +70,6 @@ public:
     virtual void SetUp()
     {
         _log = sc::Log::getInstance();
-        _log->add_backend(&_clog);
         _log->set_level(sc::LogLevel::DEBUG);
         _controller = new sc::MaestroController(_testConfig);
     }
@@ -85,54 +84,57 @@ protected:
     sc::MaestroController *_controller;
     TestMaestroConfig _testConfig;
     sc::Log *_log;
-    sc::ConsoleLog _clog;
 };
 
 TEST_F(MaestroTest, SpeedTest)
 {
-    std::chrono::milliseconds duration(1000);
+    std::chrono::milliseconds duration(500);
     ASSERT_EQ(sc::SpeedVal::STOP, _controller->get_speed());
 
     // forward
     _controller->set_speed(sc::SpeedVal::FWD10);
-    std::this_thread::sleep_for(duration);
     ASSERT_EQ(sc::SpeedVal::FWD10, _controller->get_speed());
+    std::this_thread::sleep_for(duration);
 
     _controller->set_speed(sc::SpeedVal::FWD20);
-    std::this_thread::sleep_for(duration);
     ASSERT_EQ(sc::SpeedVal::FWD20, _controller->get_speed());
+    std::this_thread::sleep_for(duration);
 
     _controller->set_speed(sc::SpeedVal::FWD30);
-    std::this_thread::sleep_for(duration);
     ASSERT_EQ(sc::SpeedVal::FWD30, _controller->get_speed());
+    std::this_thread::sleep_for(duration);
 
     _controller->set_speed(sc::SpeedVal::FWD40);
-    std::this_thread::sleep_for(duration);
     ASSERT_EQ(sc::SpeedVal::FWD40, _controller->get_speed());
+    std::this_thread::sleep_for(duration);
 
     _controller->set_speed(sc::SpeedVal::FWD50);
-    std::this_thread::sleep_for(duration);
     ASSERT_EQ(sc::SpeedVal::FWD50, _controller->get_speed());
+    std::this_thread::sleep_for(duration);
 
     _controller->set_speed(sc::SpeedVal::FWD60);
-    std::this_thread::sleep_for(duration);
     ASSERT_EQ(sc::SpeedVal::FWD60, _controller->get_speed());
+    std::this_thread::sleep_for(duration);
 
     _controller->set_speed(sc::SpeedVal::FWD70);
-    std::this_thread::sleep_for(duration);
     ASSERT_EQ(sc::SpeedVal::FWD70, _controller->get_speed());
+    std::this_thread::sleep_for(duration);
 
     _controller->set_speed(sc::SpeedVal::FWD80);
-    std::this_thread::sleep_for(duration);
     ASSERT_EQ(sc::SpeedVal::FWD80, _controller->get_speed());
+    std::this_thread::sleep_for(duration);
 
     _controller->set_speed(sc::SpeedVal::FWD90);
-    std::this_thread::sleep_for(duration);
     ASSERT_EQ(sc::SpeedVal::FWD90, _controller->get_speed());
+    std::this_thread::sleep_for(duration);
 
     _controller->set_speed(sc::SpeedVal::FWD100);
-    std::this_thread::sleep_for(duration);
     ASSERT_EQ(sc::SpeedVal::FWD100, _controller->get_speed());
+    std::this_thread::sleep_for(duration);
+
+    _controller->set_speed(sc::SpeedVal::FWD50);
+    ASSERT_EQ(sc::SpeedVal::FWD50, _controller->get_speed());
+    std::this_thread::sleep_for(duration);
 
     // stop
     _controller->set_speed(sc::SpeedVal::STOP);
@@ -140,49 +142,49 @@ TEST_F(MaestroTest, SpeedTest)
 
     // reverse
     _controller->set_speed(sc::SpeedVal::REV10);
-    std::this_thread::sleep_for(duration);
     ASSERT_EQ(sc::SpeedVal::REV10, _controller->get_speed());
+    std::this_thread::sleep_for(duration);
 
     _controller->set_speed(sc::SpeedVal::REV20);
-    std::this_thread::sleep_for(duration);
     ASSERT_EQ(sc::SpeedVal::REV20, _controller->get_speed());
+    std::this_thread::sleep_for(duration);
 
     _controller->set_speed(sc::SpeedVal::REV30);
-    std::this_thread::sleep_for(duration);
     ASSERT_EQ(sc::SpeedVal::REV30, _controller->get_speed());
+    std::this_thread::sleep_for(duration);
 
     _controller->set_speed(sc::SpeedVal::REV40);
-    std::this_thread::sleep_for(duration);
     ASSERT_EQ(sc::SpeedVal::REV40, _controller->get_speed());
+    std::this_thread::sleep_for(duration);
 
     _controller->set_speed(sc::SpeedVal::REV50);
-    std::this_thread::sleep_for(duration);
     ASSERT_EQ(sc::SpeedVal::REV50, _controller->get_speed());
+    std::this_thread::sleep_for(duration);
 
     _controller->set_speed(sc::SpeedVal::REV60);
-    std::this_thread::sleep_for(duration);
     ASSERT_EQ(sc::SpeedVal::REV60, _controller->get_speed());
+    std::this_thread::sleep_for(duration);
 
     _controller->set_speed(sc::SpeedVal::REV70);
-    std::this_thread::sleep_for(duration);
     ASSERT_EQ(sc::SpeedVal::REV70, _controller->get_speed());
+    std::this_thread::sleep_for(duration);
 
     _controller->set_speed(sc::SpeedVal::REV80);
-    std::this_thread::sleep_for(duration);
     ASSERT_EQ(sc::SpeedVal::REV80, _controller->get_speed());
+    std::this_thread::sleep_for(duration);
 
     _controller->set_speed(sc::SpeedVal::REV90);
-    std::this_thread::sleep_for(duration);
     ASSERT_EQ(sc::SpeedVal::REV90, _controller->get_speed());
+    std::this_thread::sleep_for(duration);
 
     _controller->set_speed(sc::SpeedVal::REV100);
-    std::this_thread::sleep_for(duration);
     ASSERT_EQ(sc::SpeedVal::REV100, _controller->get_speed());
+    std::this_thread::sleep_for(duration);
 }
 
 TEST_F(MaestroTest, SteeringTest)
 {
-    std::chrono::milliseconds duration(1000);
+    std::chrono::milliseconds duration(500);
 
     ASSERT_EQ(sc::SteeringVal::STRAIGHT, _controller->get_steering());
 

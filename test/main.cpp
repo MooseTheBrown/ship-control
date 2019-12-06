@@ -21,6 +21,9 @@
 #include <gtest/gtest.h>
 #include <signal.h>
 #include <cstring>
+#include "ConsoleLog.hpp"
+
+namespace sc = shipcontrol;
 
 int main(int argc, char **argv)
 {
@@ -32,9 +35,16 @@ int main(int argc, char **argv)
 
     sigaction(SIGPIPE, &ignore_act, nullptr);
 
+    sc::ConsoleLog clog;
+    sc::Log *log = sc::Log::getInstance();
+    log->add_backend(&clog);
+
     // run the tests
     ::testing::InitGoogleTest(&argc, argv);
-    return RUN_ALL_TESTS();
+    int ret = RUN_ALL_TESTS();
+
+    sc::Log::release();
+    return ret;
 }
 
 void signal_handler(int sig) {}

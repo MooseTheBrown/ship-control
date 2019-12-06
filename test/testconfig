@@ -1,7 +1,16 @@
 {
-    "engines": [1, 8],
-    "steering": [2, 6],
-    "maestro_device": "/dev/ttyACM3",
+    "engines": [
+    {
+        "channel": 0,
+        "fwd": true
+    },
+    {
+        "channel": 1,
+        "fwd": false
+    }
+    ],
+    "steering": [4],
+    "maestro_device": "/dev/ttyACM0",
     "maestro_calibration": {
         "max_fwd": 2000,
         "stop": 1000,

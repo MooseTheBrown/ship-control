@@ -53,7 +53,7 @@ TEST(Config, ConfigTest)
     ASSERT_EQ(sc::InputEvent::TURN_LEFT, evt);
 
     const char *maestro_dev = config.get_maestro_dev();
-    ASSERT_STREQ("/dev/ttyACM3", maestro_dev);
+    ASSERT_STREQ("/dev/ttyACM0", maestro_dev);
 
     sc::MaestroCalibration maestro_calibration = config.get_maestro_calibration();
     ASSERT_EQ(2000, maestro_calibration.max_fwd);
@@ -63,15 +63,16 @@ TEST(Config, ConfigTest)
     ASSERT_EQ(5000, maestro_calibration.left_max);
     ASSERT_EQ(15000, maestro_calibration.right_max);
 
-    std::vector<int> engines = config.get_engine_channels();
+    std::vector<sc::MaestroEngine> engines = config.get_engine_channels();
     ASSERT_EQ(2, engines.size());
-    ASSERT_EQ(1, engines[0]);
-    ASSERT_EQ(8, engines[1]);
+    ASSERT_EQ(0, engines[0].channel);
+    ASSERT_TRUE(engines[0].fwd);
+    ASSERT_EQ(1, engines[1].channel);
+    ASSERT_FALSE(engines[1].fwd);
 
     std::vector<int> steering = config.get_steering_channels();
-    ASSERT_EQ(2, steering.size());
-    ASSERT_EQ(2, steering[0]);
-    ASSERT_EQ(6, steering[1]);
+    ASSERT_EQ(1, steering.size());
+    ASSERT_EQ(4, steering[0]);
 
     std::string unix_socket = config.get_unix_socket_name();
     ASSERT_EQ("/tmp/scsocket", unix_socket);

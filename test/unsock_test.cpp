@@ -144,13 +144,11 @@ protected:
     sc::IPCRequestHandler *_requestHandler;
     sc::UnixListener *_unixListener;
     sc::Log *_log;
-    sc::ConsoleLog _clog;
 };
 
 void UnsockTest::SetUp()
 {
     _log = sc::Log::getInstance();
-    _log->add_backend(&_clog);
     _log->set_level(sc::LogLevel::DEBUG);
 
     _requestHandler = new sc::IPCRequestHandler(_inputQueue, *this);

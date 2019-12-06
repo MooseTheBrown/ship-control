@@ -43,7 +43,7 @@ public:
 protected:
     MaestroConfig &_config;
     const char *_dev;
-    std::vector<int> _engines;
+    std::vector<MaestroEngine> _engines;
     std::vector<int> _steering;
     MaestroCalibration _calibration;
     int _fwd_range;
@@ -55,6 +55,7 @@ protected:
 
     int speed_to_int(SpeedVal speed);
     SpeedVal int_to_speed(int speed);
+    SpeedVal mirror_speed(SpeedVal speed);
 
     int steering_to_int(SteeringVal steering);
     SteeringVal int_to_steering(int steering);

@@ -46,7 +46,7 @@ public:
     virtual const rel_map *get_relmap() { return &_relmap; }
     // MaestroConfig
     virtual const char *get_maestro_dev() { return _maestro_dev.c_str(); }
-    virtual std::vector<int> get_engine_channels() { return _engines; }
+    virtual std::vector<MaestroEngine> get_engine_channels() { return _engines; }
     virtual std::vector<int> get_steering_channels() { return _steering; }
     virtual MaestroCalibration get_maestro_calibration() { return _maestro_calibration; }
     // IPCConfig
@@ -59,7 +59,7 @@ public:
 
 protected:
     bool _is_ok;
-    std::vector<int> _engines;
+    std::vector<MaestroEngine> _engines;
     std::vector<int> _steering;
     MaestroCalibration _maestro_calibration;
     std::string _maestro_dev;

@@ -50,6 +50,9 @@ MaestroController::MaestroController(MaestroConfig &config) :
                   ((_calibration.straight - _calibration.left_max) % 10);
 
     _log = Log::getInstance();
+    _log->write(LogLevel::DEBUG, "MaestroController ctor\n");
+    _log->write(LogLevel::DEBUG, "_fwd_range = %d, _rev_range = %d, _right_range = %d, _left_range = %d\n",
+            _fwd_range, _rev_range, _right_range, _left_range);
 
     // open and configure Maestro serial device
     if (_dev != nullptr) {
@@ -98,11 +101,20 @@ SpeedVal MaestroController::get_speed()
     }
 
     // assume that all engines have the same speed
-    MaestroCmd cmd(_fd, MaestroCmdCode::GETPOS, _engines[0]);
+    MaestroCmd cmd(_fd, MaestroCmdCode::GETPOS, _engines[0].channel);
     unsigned char *pval = cmd.send();
     int val = (*(pval + 1) << 8) | (*pval);
+    // Pololu protocol works with quarter-microseconds
+    val /= 4;
     _log->write(LogLevel::DEBUG, "MaestroController::get_speed(), value=%d\n", val);
-    return int_to_speed(val);
+    if (_engines[0].fwd)
+    {
+        return int_to_speed(val);
+    }
+    else
+    {
+        return mirror_speed(int_to_speed(val));
+    }
 }
 
 void MaestroController::set_speed(SpeedVal speed)
@@ -112,14 +124,27 @@ void MaestroController::set_speed(SpeedVal speed)
         return;
     }
 
-    int val = speed_to_int(speed);
-    _log->write(LogLevel::DEBUG, "MaestroController::set_speed(), value=%d\n", val);
-    unsigned char val0 = val & 0x7F;
-    unsigned char val1 = (val >> 7) & 0x7F;
-
     // send command for each engine
-    for (int engine : _engines) {
-        MaestroCmd cmd(_fd, MaestroCmdCode::SETTARGET, engine, val0, val1);
+    for (MaestroEngine engine : _engines)
+    {
+        int val = 0;
+        if (engine.fwd)
+        {
+            val = speed_to_int(speed);
+        }
+        else
+        {
+            val = speed_to_int(mirror_speed(speed));
+        }
+
+        _log->write(LogLevel::DEBUG,
+                "MaestroController::set_speed(), channel=%d, fwd=%d, value=%d\n",
+                engine.channel, engine.fwd, val);
+        // Pololu protocol requires values in quarter-microseconds
+        val *= 4;
+        unsigned char val0 = val & 0x7F;
+        unsigned char val1 = (val >> 7) & 0x7F;
+        MaestroCmd cmd(_fd, MaestroCmdCode::SETTARGET, engine.channel, val0, val1);
         cmd.send();
     }
 }
@@ -135,6 +160,8 @@ SteeringVal MaestroController::get_steering()
     MaestroCmd cmd(_fd, MaestroCmdCode::GETPOS, _steering[0]);
     unsigned char *pval = cmd.send();
     int val = (*(pval + 1) << 8) | (*pval);
+    // Pololu protocol works with quarter-microseconds
+    val /= 4;
     _log->write(LogLevel::DEBUG, "MaestroController::get_steering(), value=%d\n", val);
     return int_to_steering(val);
 }
@@ -148,11 +175,14 @@ void MaestroController::set_steering(SteeringVal steering)
 
     int val = steering_to_int(steering);
     _log->write(LogLevel::DEBUG, "MaestroController::set_steering(), value=%d\n", val);
+    // Pololu protocol requires values in quarter-microseconds
+    val *= 4;
     unsigned char val0 = val & 0x7F;
     unsigned char val1 = (val >> 7) & 0x7F;
 
     // send command for each steering servo
-    for (int servo : _steering) {
+    for (int servo : _steering)
+    {
         MaestroCmd cmd(_fd, MaestroCmdCode::SETTARGET, servo, val0, val1);
         cmd.send();
     }
@@ -272,6 +302,55 @@ SpeedVal MaestroController::int_to_speed(int speed)
         return SpeedVal::REV100;
     default:
         return SpeedVal::STOP;
+    }
+}
+
+SpeedVal MaestroController::mirror_speed(SpeedVal speed)
+{
+    switch (speed)
+    {
+    case SpeedVal::STOP:
+        return SpeedVal::STOP;
+    case SpeedVal::FWD10:
+        return SpeedVal::REV10;
+    case SpeedVal::FWD20:
+        return SpeedVal::REV20;
+    case SpeedVal::FWD30:
+        return SpeedVal::REV30;
+    case SpeedVal::FWD40:
+        return SpeedVal::REV40;
+    case SpeedVal::FWD50:
+        return SpeedVal::REV50;
+    case SpeedVal::FWD60:
+        return SpeedVal::REV60;
+    case SpeedVal::FWD70:
+        return SpeedVal::REV70;
+    case SpeedVal::FWD80:
+        return SpeedVal::REV80;
+    case SpeedVal::FWD90:
+        return SpeedVal::REV90;
+    case SpeedVal::FWD100:
+        return SpeedVal::REV100;
+    case SpeedVal::REV10:
+        return SpeedVal::FWD10;
+    case SpeedVal::REV20:
+        return SpeedVal::FWD20;
+    case SpeedVal::REV30:
+        return SpeedVal::FWD30;
+    case SpeedVal::REV40:
+        return SpeedVal::FWD40;
+    case SpeedVal::REV50:
+        return SpeedVal::FWD50;
+    case SpeedVal::REV60:
+        return SpeedVal::FWD60;
+    case SpeedVal::REV70:
+        return SpeedVal::FWD70;
+    case SpeedVal::REV80:
+        return SpeedVal::FWD80;
+    case SpeedVal::REV90:
+        return SpeedVal::FWD90;
+    case SpeedVal::REV100:
+        return SpeedVal::FWD100;
     }
 }
 

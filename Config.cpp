@@ -200,7 +200,20 @@ void Config::parse(const std::string &filename)
         auto engines = j["engines"];
         for (auto engine : engines)
         {
-            _engines.push_back(engine);
+            MaestroEngine me{0, true};
+            if (engine.find("channel") != engine.end())
+            {
+                me.channel = engine["channel"].get<int>();
+            }
+            else
+            {
+                _is_ok = false;
+            }
+            if (engine.find("fwd") != engine.end())
+            {
+                me.fwd = engine["fwd"].get<bool>();
+            }
+            _engines.push_back(me);
         }
     }
     else

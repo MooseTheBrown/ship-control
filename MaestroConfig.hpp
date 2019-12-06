@@ -36,12 +36,18 @@ struct MaestroCalibration
     int right_max;
 };
 
+struct MaestroEngine
+{
+    int channel;
+    bool fwd;
+};
+
 // Maestro controller configuration provider
 class MaestroConfig
 {
 public:
     virtual const char *get_maestro_dev() = 0;
-    virtual std::vector<int> get_engine_channels() = 0;
+    virtual std::vector<MaestroEngine> get_engine_channels() = 0;
     virtual std::vector<int> get_steering_channels() = 0;
     virtual MaestroCalibration get_maestro_calibration() = 0;
 };

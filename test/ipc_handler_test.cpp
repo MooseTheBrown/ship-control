@@ -58,13 +58,11 @@ protected:
     sc::InputQueue _input_queue;
     sc::IPCRequestHandler *_handler;
     sc::Log *_log;
-    sc::ConsoleLog _clog;
 };
 
 void IPCHandlerTest::SetUp()
 {
     _log = sc::Log::getInstance();
-    _log->add_backend(&_clog);
     _log->set_level(sc::LogLevel::DEBUG);
     _handler = new sc::IPCRequestHandler(_input_queue, _data_provider);
 }
