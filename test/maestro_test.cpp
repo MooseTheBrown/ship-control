@@ -46,7 +46,7 @@ public:
     virtual std::vector<int> get_steering_channels()
     {
         std::vector<int> steering;
-        steering.push_back(4);
+        steering.push_back(5);
         return steering;
     }
 
@@ -56,9 +56,9 @@ public:
         calibration.max_fwd = 2304;
         calibration.stop = 1504;
         calibration.max_rev = 704;
-        calibration.straight = 1700;
-        calibration.left_max = 896;
-        calibration.right_max = 2474;
+        calibration.straight = 1500;
+        calibration.left_max = 1000;
+        calibration.right_max = 2000;
         return calibration;
     }
 };

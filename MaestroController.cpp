@@ -107,14 +107,26 @@ SpeedVal MaestroController::get_speed()
     // Pololu protocol works with quarter-microseconds
     val /= 4;
     _log->write(LogLevel::DEBUG, "MaestroController::get_speed(), value=%d\n", val);
+
+    SpeedVal maestro_speed;
     if (_engines[0].fwd)
     {
-        return int_to_speed(val);
+        maestro_speed = int_to_speed(val);
     }
     else
     {
-        return mirror_speed(int_to_speed(val));
+        maestro_speed = mirror_speed(int_to_speed(val));
     }
+
+    if (_cur_speed != maestro_speed)
+    {
+        // Sometimes Maestro reports really strange speed values, which can not possibly
+        // be correct
+        _log->write(LogLevel::NOTICE, "Maestro reported incorrect speed: %d, expecting %d\n",
+                maestro_speed, _cur_speed);
+    }
+
+    return _cur_speed;
 }
 
 void MaestroController::set_speed(SpeedVal speed)
@@ -147,6 +159,8 @@ void MaestroController::set_speed(SpeedVal speed)
         MaestroCmd cmd(_fd, MaestroCmdCode::SETTARGET, engine.channel, val0, val1);
         cmd.send();
     }
+
+    _cur_speed = speed;
 }
 
 SteeringVal MaestroController::get_steering()
@@ -163,7 +177,17 @@ SteeringVal MaestroController::get_steering()
     // Pololu protocol works with quarter-microseconds
     val /= 4;
     _log->write(LogLevel::DEBUG, "MaestroController::get_steering(), value=%d\n", val);
-    return int_to_steering(val);
+
+    SteeringVal maestro_steering = int_to_steering(val);
+    if (_cur_steering != maestro_steering)
+    {
+        // Sometimes Maestro reports really strange values, which can not possibly
+        // be correct.
+        _log->write(LogLevel::NOTICE, "Maestro reported incorrect steering: %d, expecting %d\n",
+                maestro_steering, _cur_steering);
+    }
+
+    return _cur_steering;
 }
 
 void MaestroController::set_steering(SteeringVal steering)
@@ -186,6 +210,8 @@ void MaestroController::set_steering(SteeringVal steering)
         MaestroCmd cmd(_fd, MaestroCmdCode::SETTARGET, servo, val0, val1);
         cmd.send();
     }
+
+    _cur_steering = steering;
 }
 
 int MaestroController::speed_to_int(SpeedVal speed)

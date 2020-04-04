@@ -52,6 +52,8 @@ protected:
     int _left_range;
     int _fd;
     Log *_log;
+    SpeedVal _cur_speed;
+    SteeringVal _cur_steering;
 
     int speed_to_int(SpeedVal speed);
     SpeedVal int_to_speed(int speed);
