@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016-2018 Mikhail Sapozhnikov
+ * Copyright (C) 2016-2023 Mikhail Sapozhnikov
  *
  * This file is part of ship-control.
  *
@@ -171,7 +171,7 @@ Config::Config(const std::string &filename) :
     _evtstring_map.insert(std::make_pair("SPEED_UP", InputEvent::SPEED_UP));
     _evtstring_map.insert(std::make_pair("SPEED_DOWN", InputEvent::SPEED_DOWN));
 
-    std::memset(&_maestro_calibration, 0, sizeof(MaestroCalibration));
+    std::memset(&_steering_calibration, 0, sizeof(SteeringCalibration));
 
     // parse the config
     parse(filename);
@@ -213,6 +213,30 @@ void Config::parse(const std::string &filename)
             {
                 me.fwd = engine["fwd"].get<bool>();
             }
+            if (engine.find("dir_channel") != engine.end())
+            {
+                me.dir_channel = engine["dir_channel"].get<int>();
+            }
+            else
+            {
+                me.dir_channel = MaestroEngine::NO_CHANNEL;
+            }
+            if (engine.find("stop") != engine.end())
+            {
+                me.stop = engine["stop"].get<int>();
+            }
+            else
+            {
+                _is_ok = false;
+            }
+            if (engine.find("step") != engine.end())
+            {
+                me.step = engine["step"].get<int>();
+            }
+            else
+            {
+                _is_ok = false;
+            }
             _engines.push_back(me);
         }
     }
@@ -247,37 +271,56 @@ void Config::parse(const std::string &filename)
     }
 
     // get maestro calibration data
-    if (j.find("maestro_calibration") != j.end())
+    if (j.find("steering_calibration") != j.end())
     {
-        auto calibration = j["maestro_calibration"];
-        if (calibration.find("max_fwd") != calibration.end())
-        {
-            _maestro_calibration.max_fwd = calibration["max_fwd"].get<int>();
-        }
-        if (calibration.find("stop") != calibration.end())
-        {
-            _maestro_calibration.stop = calibration["stop"].get<int>();
-        }
-        if (calibration.find("max_rev") != calibration.end())
-        {
-            _maestro_calibration.max_rev = calibration["max_rev"].get<int>();
-        }
+        auto calibration = j["steering_calibration"];
         if (calibration.find("straight") != calibration.end())
         {
-            _maestro_calibration.straight = calibration["straight"].get<int>();
+            _steering_calibration.straight = calibration["straight"].get<int>();
         }
-        if (calibration.find("left_max") != calibration.end())
+        else
         {
-            _maestro_calibration.left_max = calibration["left_max"].get<int>();
+            _is_ok = false;
         }
-        if (calibration.find("right_max") != calibration.end())
+        if (calibration.find("step") != calibration.end())
         {
-            _maestro_calibration.right_max = calibration["right_max"].get<int>();
+            _steering_calibration.step = calibration["step"].get<int>();
+        }
+        else
+        {
+            _is_ok = false;
         }
     }
     else
     {
         _is_ok = false;
+    }
+
+    // direction channels config
+    if (j.find("direction") != j.end())
+    {
+        auto direction = j["direction"];
+        if (direction.find("high") != direction.end())
+        {
+            _dir_high = direction["high"].get<int>();
+        }
+        else
+        {
+            _dir_high = MaestroConfig::DEFAULT_DIR_HIGH;
+        }
+        if (direction.find("low") != direction.end())
+        {
+            _dir_low = direction["low"].get<int>();
+        }
+        else
+        {
+            _dir_low = MaestroConfig::DEFAULT_DIR_LOW;
+        }
+    }
+    else
+    {
+        _dir_high = MaestroConfig::DEFAULT_DIR_HIGH;
+        _dir_low = MaestroConfig::DEFAULT_DIR_LOW;
     }
 
     // get keymap

@@ -1,23 +1,28 @@
 {
     "engines": [
     {
-        "channel": 0,
-        "fwd": true
+        "channel": 8,
+        "fwd": true,
+        "dir_channel": 0,
+        "stop": 100,
+        "step": 240
     },
     {
         "channel": 1,
-        "fwd": false
+        "fwd": false,
+        "stop": 2000,
+        "step": 300
     }
     ],
     "steering": [4],
     "maestro_device": "/dev/ttyACM0",
-    "maestro_calibration": {
-        "max_fwd": 2000,
-        "stop": 1000,
-        "max_rev": 1,
-        "straight": 10000,
-        "left_max": 5000,
-        "right_max": 15000
+    "steering_calibration": {
+        "straight": 1500,
+        "step": 80
+    },
+    "direction": {
+        "high": 1900,
+        "low": 800
     },
     "keymap": {
         "KEY_1": "SPEED_UP",

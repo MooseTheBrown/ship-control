@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016 - 2018 Mikhail Sapozhnikov
+ * Copyright (C) 2016 - 2023 Mikhail Sapozhnikov
  *
  * This file is part of ship-control.
  *
@@ -48,7 +48,9 @@ public:
     virtual const char *get_maestro_dev() { return _maestro_dev.c_str(); }
     virtual std::vector<MaestroEngine> get_engine_channels() { return _engines; }
     virtual std::vector<int> get_steering_channels() { return _steering; }
-    virtual MaestroCalibration get_maestro_calibration() { return _maestro_calibration; }
+    virtual SteeringCalibration get_steering_calibration() { return _steering_calibration; }
+    virtual int get_direction_high() { return _dir_high; }
+    virtual int get_direction_low() { return _dir_low; }
     // IPCConfig
     virtual std::string get_unix_socket_name() { return _unix_socket; }
     // general configuration
@@ -61,7 +63,9 @@ protected:
     bool _is_ok;
     std::vector<MaestroEngine> _engines;
     std::vector<int> _steering;
-    MaestroCalibration _maestro_calibration;
+    SteeringCalibration _steering_calibration;
+    int _dir_high;
+    int _dir_low;
     std::string _maestro_dev;
     std::unordered_map<std::string, int> _keystring_map;
     std::unordered_map<std::string, RelEvent> _relstring_map;

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016 Mikhail Sapozhnikov
+ * Copyright (C) 2016 - 2023 Mikhail Sapozhnikov
  *
  * This file is part of ship-control.
  *
@@ -38,8 +38,8 @@ public:
     virtual std::vector<sc::MaestroEngine> get_engine_channels()
     {
         std::vector<sc::MaestroEngine> engines;
-        engines.push_back(sc::MaestroEngine{0, true});
-        engines.push_back(sc::MaestroEngine{1, false});
+        engines.push_back(sc::MaestroEngine{8, 0, true, 100, 240});
+        engines.push_back(sc::MaestroEngine{1, sc::MaestroEngine::NO_CHANNEL, false, 1500, 80});
         return engines;
     }
 
@@ -50,16 +50,22 @@ public:
         return steering;
     }
 
-    virtual sc::MaestroCalibration get_maestro_calibration()
+    virtual sc::SteeringCalibration get_steering_calibration()
     {
-        sc::MaestroCalibration calibration;
-        calibration.max_fwd = 2304;
-        calibration.stop = 1504;
-        calibration.max_rev = 704;
-        calibration.straight = 1500;
-        calibration.left_max = 1000;
-        calibration.right_max = 2000;
+        sc::SteeringCalibration calibration;
+        calibration.straight = 1504;
+        calibration.step = 80;
         return calibration;
+    }
+
+    virtual int get_direction_high()
+    {
+        return sc::MaestroConfig::DEFAULT_DIR_HIGH;
+    }
+
+    virtual int get_direction_low()
+    {
+        return sc::MaestroConfig::DEFAULT_DIR_LOW;
     }
 };
 

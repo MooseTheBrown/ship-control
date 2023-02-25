@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016 - 2018 Mikhail Sapozhnikov
+ * Copyright (C) 2016 - 2023 Mikhail Sapozhnikov
  *
  * This file is part of ship-control.
  *
@@ -21,6 +21,7 @@
 #include <gtest/gtest.h>
 #include <linux/input.h>
 #include "Config.hpp"
+#include "MaestroConfig.hpp"
 
 #ifndef TESTCONFIG_FILE
 #error "TESTCONFIG_FILE is not defined"
@@ -55,24 +56,31 @@ TEST(Config, ConfigTest)
     const char *maestro_dev = config.get_maestro_dev();
     ASSERT_STREQ("/dev/ttyACM0", maestro_dev);
 
-    sc::MaestroCalibration maestro_calibration = config.get_maestro_calibration();
-    ASSERT_EQ(2000, maestro_calibration.max_fwd);
-    ASSERT_EQ(1000, maestro_calibration.stop);
-    ASSERT_EQ(1, maestro_calibration.max_rev);
-    ASSERT_EQ(10000, maestro_calibration.straight);
-    ASSERT_EQ(5000, maestro_calibration.left_max);
-    ASSERT_EQ(15000, maestro_calibration.right_max);
+    sc::SteeringCalibration steering_calibration = config.get_steering_calibration();
+    ASSERT_EQ(1500, steering_calibration.straight);
+    ASSERT_EQ(80, steering_calibration.step);
 
     std::vector<sc::MaestroEngine> engines = config.get_engine_channels();
     ASSERT_EQ(2, engines.size());
-    ASSERT_EQ(0, engines[0].channel);
+    ASSERT_EQ(8, engines[0].channel);
     ASSERT_TRUE(engines[0].fwd);
+    ASSERT_EQ(0, engines[0].dir_channel);
+    ASSERT_EQ(100, engines[0].stop);
+    ASSERT_EQ(240, engines[0].step);
     ASSERT_EQ(1, engines[1].channel);
     ASSERT_FALSE(engines[1].fwd);
+    ASSERT_EQ(sc::MaestroEngine::NO_CHANNEL, engines[1].dir_channel);
+    ASSERT_EQ(2000, engines[1].stop);
+    ASSERT_EQ(300, engines[1].step);
 
     std::vector<int> steering = config.get_steering_channels();
     ASSERT_EQ(1, steering.size());
     ASSERT_EQ(4, steering[0]);
+
+    int dir_high = config.get_direction_high();
+    ASSERT_EQ(1900, dir_high);
+    int dir_low = config.get_direction_low();
+    ASSERT_EQ(800, dir_low);
 
     std::string unix_socket = config.get_unix_socket_name();
     ASSERT_EQ("/tmp/scsocket", unix_socket);

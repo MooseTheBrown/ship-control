@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016 Mikhail Sapozhnikov
+ * Copyright (C) 2016 - 2023 Mikhail Sapozhnikov
  *
  * This file is part of ship-control.
  *
@@ -45,22 +45,16 @@ protected:
     const char *_dev;
     std::vector<MaestroEngine> _engines;
     std::vector<int> _steering;
-    MaestroCalibration _calibration;
-    int _fwd_range;
-    int _rev_range;
-    int _right_range;
-    int _left_range;
+    SteeringCalibration _steering_calibration;
+    int _dir_high;
+    int _dir_low;
     int _fd;
     Log *_log;
     SpeedVal _cur_speed;
     SteeringVal _cur_steering;
 
-    int speed_to_int(SpeedVal speed);
-    SpeedVal int_to_speed(int speed);
-    SpeedVal mirror_speed(SpeedVal speed);
-
+    int speed_to_int(SpeedVal speed, const MaestroEngine &engine);
     int steering_to_int(SteeringVal steering);
-    SteeringVal int_to_steering(int steering);
 
     bool is_sane();
 };

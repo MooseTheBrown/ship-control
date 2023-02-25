@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016 Mikhail Sapozhnikov
+ * Copyright (C) 2016 - 2023 Mikhail Sapozhnikov
  *
  * This file is part of ship-control.
  *
@@ -27,53 +27,53 @@ namespace shipcontrol
 // speed values in % of maximum
 enum class SpeedVal
 {
-    STOP,
-    FWD10,
-    FWD20,
-    FWD30,
-    FWD40,
-    FWD50,
-    FWD60,
-    FWD70,
-    FWD80,
-    FWD90,
-    FWD100,
-    REV10,
-    REV20,
-    REV30,
-    REV40,
-    REV50,
-    REV60,
-    REV70,
-    REV80,
-    REV90,
-    REV100
+    STOP = 0,
+    FWD10 = 1,
+    FWD20 = 2,
+    FWD30 = 3,
+    FWD40 = 4,
+    FWD50 = 5,
+    FWD60 = 6,
+    FWD70 = 7,
+    FWD80 = 8,
+    FWD90 = 9,
+    FWD100 = 10,
+    REV10 = -1,
+    REV20 = -2,
+    REV30 = -3,
+    REV40 = -4,
+    REV50 = -5,
+    REV60 = -6,
+    REV70 = -7,
+    REV80 = -8,
+    REV90 = -9,
+    REV100 = -10
 };
 
 // steering values in % of maximum angle
 enum class SteeringVal
 {
-    STRAIGHT,
-    RIGHT10,
-    RIGHT20,
-    RIGHT30,
-    RIGHT40,
-    RIGHT50,
-    RIGHT60,
-    RIGHT70,
-    RIGHT80,
-    RIGHT90,
-    RIGHT100,
-    LEFT10,
-    LEFT20,
-    LEFT30,
-    LEFT40,
-    LEFT50,
-    LEFT60,
-    LEFT70,
-    LEFT80,
-    LEFT90,
-    LEFT100
+    STRAIGHT = 0,
+    RIGHT10 = 1,
+    RIGHT20 = 2,
+    RIGHT30 = 3,
+    RIGHT40 = 4,
+    RIGHT50 = 5,
+    RIGHT60 = 6,
+    RIGHT70 = 7,
+    RIGHT80 = 8,
+    RIGHT90 = 9,
+    RIGHT100 = 10,
+    LEFT10 = -1,
+    LEFT20 = -2,
+    LEFT30 = -3,
+    LEFT40 = -4,
+    LEFT50 = -5,
+    LEFT60 = -6,
+    LEFT70 = -7,
+    LEFT80 = -8,
+    LEFT90 = -9,
+    LEFT100 = -10
 };
 
 // servo controller interface

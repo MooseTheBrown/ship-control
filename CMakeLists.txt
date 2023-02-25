@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2016 - 2018 Mikhail Sapozhnikov
+# Copyright (C) 2016 - 2023 Mikhail Sapozhnikov
 #
 # This file is part of ship-control.
 #
@@ -38,6 +38,7 @@ include_directories (${ship-control_SOURCE_DIR})
 set (SHIPCONTROL_SRC Log.cpp
                      ConsoleLog.cpp
                      SysLog.cpp
+                     MaestroConfig.cpp
                      MaestroCmd.cpp
                      MaestroController.cpp
                      InputQueue.cpp

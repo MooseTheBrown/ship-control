@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016 Mikhail Sapozhnikov
+ * Copyright (C) 2016 - 2023 Mikhail Sapozhnikov
  *
  * This file is part of ship-control.
  *
@@ -26,30 +26,42 @@
 namespace shipcontrol
 {
 
-struct MaestroCalibration
+struct SteeringCalibration
 {
-    int max_fwd;
-    int stop;
-    int max_rev;
     int straight;
-    int left_max;
-    int right_max;
+    int step;
 };
 
+// engine config
 struct MaestroEngine
 {
+    // rotation speed channel
     int channel;
+    // rotation direction channel
+    int dir_channel;
+    // forward rotation flag
     bool fwd;
+    // stop engine position
+    int stop;
+    // 10% speed increase/decrease step
+    int step;
+
+    static const int NO_CHANNEL;
 };
 
 // Maestro controller configuration provider
 class MaestroConfig
 {
 public:
+    static const int DEFAULT_DIR_HIGH;
+    static const int DEFAULT_DIR_LOW;
+
     virtual const char *get_maestro_dev() = 0;
     virtual std::vector<MaestroEngine> get_engine_channels() = 0;
     virtual std::vector<int> get_steering_channels() = 0;
-    virtual MaestroCalibration get_maestro_calibration() = 0;
+    virtual SteeringCalibration get_steering_calibration() = 0;
+    virtual int get_direction_high() = 0;
+    virtual int get_direction_low() = 0;
 };
 
 } // namespace shipcontrol
