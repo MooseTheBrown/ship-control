@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016 - 2018 Mikhail Sapozhnikov
+ * Copyright (C) 2016 - 2023 Mikhail Sapozhnikov
  *
  * This file is part of ship-control.
  *
@@ -101,7 +101,8 @@ void EvdevReader::handle_event(input_event &event)
         auto match = _keymap->find(event.code);
         if (match != _keymap->end())
         {
-            _queue.push(match->second);
+            InputEvent evt{match->second, ""};
+            _queue.push(evt);
         }
     }
 
@@ -111,7 +112,8 @@ void EvdevReader::handle_event(input_event &event)
         auto match = _relmap->find(rel);
         if (match != _relmap->end())
         {
-            _queue.push(match->second);
+            InputEvent evt{match->second, ""};
+            _queue.push(evt);
         }
     }
 }

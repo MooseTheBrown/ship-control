@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016 Mikhail Sapozhnikov
+ * Copyright (C) 2016 - 2023 Mikhail Sapozhnikov
  *
  * This file is part of ship-control.
  *
@@ -28,13 +28,21 @@
 namespace shipcontrol
 {
 
-enum class InputEvent
+enum class InputEventType
 {
     UNKNOWN,
     TURN_RIGHT,
     TURN_LEFT,
     SPEED_UP,
-    SPEED_DOWN
+    SPEED_DOWN,
+    SET_SPEED,
+    SET_STEERING
+};
+
+struct InputEvent
+{
+    InputEventType type;
+    std::string data;
 };
 
 // a thread-safe queue of input events

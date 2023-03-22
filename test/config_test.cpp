@@ -40,18 +40,18 @@ TEST(Config, ConfigTest)
     ASSERT_EQ(true, config.is_ok());
 
     const sc::key_map *keymap = config.get_keymap();
-    sc::InputEvent evt = keymap->at(KEY_1);
-    ASSERT_EQ(sc::InputEvent::SPEED_UP, evt);
-    evt = keymap->at(KEY_2);
-    ASSERT_EQ(sc::InputEvent::SPEED_DOWN, evt);
+    sc::InputEventType evtType = keymap->at(KEY_1);
+    ASSERT_EQ(sc::InputEventType::SPEED_UP, evtType);
+    evtType = keymap->at(KEY_2);
+    ASSERT_EQ(sc::InputEventType::SPEED_DOWN, evtType);
 
     const sc::rel_map *relmap = config.get_relmap();
     sc::RelEvent rel1{REL_Y, true};
-    evt = relmap->at(rel1);
-    ASSERT_EQ(sc::InputEvent::TURN_RIGHT, evt);
+    evtType = relmap->at(rel1);
+    ASSERT_EQ(sc::InputEventType::TURN_RIGHT, evtType);
     sc::RelEvent rel2{REL_X, false};
-    evt = relmap->at(rel2);
-    ASSERT_EQ(sc::InputEvent::TURN_LEFT, evt);
+    evtType = relmap->at(rel2);
+    ASSERT_EQ(sc::InputEventType::TURN_LEFT, evtType);
 
     const char *maestro_dev = config.get_maestro_dev();
     ASSERT_STREQ("/dev/ttyACM0", maestro_dev);

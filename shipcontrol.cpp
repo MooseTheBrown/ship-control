@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016 - 2018 Mikhail Sapozhnikov
+ * Copyright (C) 2016 - 2023 Mikhail Sapozhnikov
  *
  * This file is part of ship-control.
  *
@@ -91,19 +91,25 @@ int ShipControl::run()
         }
 
         InputEvent evt = _inputQueue.pop_blocking();
-        switch (evt)
+        switch (evt.type)
         {
-        case InputEvent::TURN_RIGHT:
+        case InputEventType::TURN_RIGHT:
             turn_right();
             break;
-        case InputEvent::TURN_LEFT:
+        case InputEventType::TURN_LEFT:
             turn_left();
             break;
-        case InputEvent::SPEED_UP:
+        case InputEventType::SPEED_UP:
             speed_up();
             break;
-        case InputEvent::SPEED_DOWN:
+        case InputEventType::SPEED_DOWN:
             speed_down();
+            break;
+        case InputEventType::SET_SPEED:
+            set_speed(evt.data);
+            break;
+        case InputEventType::SET_STEERING:
+            set_steering(evt.data);
             break;
         default:
             break;
@@ -162,7 +168,7 @@ void ShipControl::interrupt()
 {
     _stop = true;
     // push dummy event to the input queue, so that run() could detect stop flag
-    _inputQueue.push(InputEvent::UNKNOWN);
+    _inputQueue.push(InputEvent{InputEventType::UNKNOWN, ""});
 }
 
 void ShipControl::find_input_device(const char *input_name, std::string &result)
@@ -493,6 +499,21 @@ void ShipControl::speed_down()
 
     _controller->set_speed(new_speed);
     _speed = _controller->get_speed();
+}
+
+
+void ShipControl::set_speed(const std::string &speed_str)
+{
+    SpeedVal new_speed = ServoController::str_to_speed(speed_str);
+    _controller->set_speed(new_speed);
+    _speed = _controller->get_speed();
+}
+
+void ShipControl::set_steering(const std::string &steering_str)
+{
+    SteeringVal new_steering = ServoController::str_to_steering(steering_str);
+    _controller->set_steering(new_steering);
+    _steering = _controller->get_steering();
 }
 
 void ShipControl::setup_signals()

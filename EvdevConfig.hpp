@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016 Mikhail Sapozhnikov
+ * Copyright (C) 2016 - 2023 Mikhail Sapozhnikov
  *
  * This file is part of ship-control.
  *
@@ -43,9 +43,9 @@ public:
 };
 
 // KEY event to shipcontrol action mapping
-typedef std::unordered_map<int, InputEvent> key_map;
+typedef std::unordered_map<int, InputEventType> key_map;
 // REL event to shipcontrol action mapping
-typedef std::unordered_map<RelEvent, InputEvent, RelEventHasher> rel_map;
+typedef std::unordered_map<RelEvent, InputEventType, RelEventHasher> rel_map;
 
 // Configuration provider for EvdevReader
 class EvdevConfig

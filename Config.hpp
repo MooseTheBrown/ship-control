@@ -69,7 +69,7 @@ protected:
     std::string _maestro_dev;
     std::unordered_map<std::string, int> _keystring_map;
     std::unordered_map<std::string, RelEvent> _relstring_map;
-    std::unordered_map<std::string, InputEvent> _evtstring_map;
+    std::unordered_map<std::string, InputEventType> _evtstring_map;
     key_map _keymap;
     rel_map _relmap;
     std::string _unix_socket;

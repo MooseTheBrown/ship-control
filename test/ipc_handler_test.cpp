@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016 - 2018 Mikhail Sapozhnikov
+ * Copyright (C) 2016 - 2023 Mikhail Sapozhnikov
  *
  * This file is part of ship-control.
  *
@@ -86,7 +86,7 @@ TEST_F(IPCHandlerTest, ValidCommand)
     resp = json::parse(_handler->handleRequest(rq.dump()));
     ASSERT_TRUE(resp["status"].get<std::string>() == "ok");
     ASSERT_FALSE(_input_queue.is_empty());
-    ASSERT_EQ(sc::InputEvent::SPEED_UP, _input_queue.pop());
+    ASSERT_EQ(sc::InputEventType::SPEED_UP, _input_queue.pop().type);
     ASSERT_TRUE(_input_queue.is_empty());
 
     rq["type"] = "cmd";
@@ -94,7 +94,7 @@ TEST_F(IPCHandlerTest, ValidCommand)
     resp = json::parse(_handler->handleRequest(rq.dump()));
     ASSERT_TRUE(resp["status"].get<std::string>() == "ok");
     ASSERT_FALSE(_input_queue.is_empty());
-    ASSERT_EQ(sc::InputEvent::SPEED_DOWN, _input_queue.pop());
+    ASSERT_EQ(sc::InputEventType::SPEED_DOWN, _input_queue.pop().type);
     ASSERT_TRUE(_input_queue.is_empty());
 
     rq["type"] = "cmd";
@@ -102,7 +102,7 @@ TEST_F(IPCHandlerTest, ValidCommand)
     resp = json::parse(_handler->handleRequest(rq.dump()));
     ASSERT_TRUE(resp["status"].get<std::string>() == "ok");
     ASSERT_FALSE(_input_queue.is_empty());
-    ASSERT_EQ(sc::InputEvent::TURN_LEFT, _input_queue.pop());
+    ASSERT_EQ(sc::InputEventType::TURN_LEFT, _input_queue.pop().type);
     ASSERT_TRUE(_input_queue.is_empty());
 
     rq["type"] = "cmd";
@@ -110,8 +110,30 @@ TEST_F(IPCHandlerTest, ValidCommand)
     resp = json::parse(_handler->handleRequest(rq.dump()));
     ASSERT_TRUE(resp["status"].get<std::string>() == "ok");
     ASSERT_FALSE(_input_queue.is_empty());
-    ASSERT_EQ(sc::InputEvent::TURN_RIGHT, _input_queue.pop());
+    ASSERT_EQ(sc::InputEventType::TURN_RIGHT, _input_queue.pop().type);
     ASSERT_TRUE(_input_queue.is_empty());
+
+    rq["type"] = "cmd";
+    rq["cmd"] = "set_speed";
+    rq["data"] = "rev20";
+    resp = json::parse(_handler->handleRequest(rq.dump()));
+    ASSERT_TRUE(resp["status"].get<std::string>() == "ok");
+    ASSERT_FALSE(_input_queue.is_empty());
+    sc::InputEvent evt = _input_queue.pop();
+    ASSERT_TRUE(_input_queue.is_empty());
+    ASSERT_EQ(sc::InputEventType::SET_SPEED, evt.type);
+    ASSERT_EQ("rev20", evt.data);
+
+    rq["type"] = "cmd";
+    rq["cmd"] = "set_steering";
+    rq["data"] = "left70";
+    resp = json::parse(_handler->handleRequest(rq.dump()));
+    ASSERT_TRUE(resp["status"].get<std::string>() == "ok");
+    ASSERT_FALSE(_input_queue.is_empty());
+    evt = _input_queue.pop();
+    ASSERT_TRUE(_input_queue.is_empty());
+    ASSERT_EQ(sc::InputEventType::SET_STEERING, evt.type);
+    ASSERT_EQ("left70", evt.data);
 }
 
 TEST_F(IPCHandlerTest, InvalidCommand)
@@ -133,6 +155,26 @@ TEST_F(IPCHandlerTest, InvalidCommand)
     json rq2;
     rq2["type"] = "cmd";
     resp = json::parse(_handler->handleRequest(rq2.dump()));
+    ASSERT_TRUE(resp["status"].get<std::string>() == "fail");
+
+    json rq3;
+    rq3["type"] = "cmd";
+    rq3["cmd"] = "set_speed";
+    resp = json::parse(_handler->handleRequest(rq3.dump()));
+    ASSERT_TRUE(resp["status"].get<std::string>() == "fail");
+
+    rq3["data"] = "somedata";
+    resp = json::parse(_handler->handleRequest(rq3.dump()));
+    ASSERT_TRUE(resp["status"].get<std::string>() == "fail");
+
+    json rq4;
+    rq4["type"] = "cmd";
+    rq4["cmd"] = "set_steering";
+    resp = json::parse(_handler->handleRequest(rq4.dump()));
+    ASSERT_TRUE(resp["status"].get<std::string>() == "fail");
+
+    rq4["data"] = "somedata";
+    resp = json::parse(_handler->handleRequest(rq4.dump()));
     ASSERT_TRUE(resp["status"].get<std::string>() == "fail");
 }
 

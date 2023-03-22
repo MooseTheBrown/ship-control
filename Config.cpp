@@ -166,10 +166,10 @@ Config::Config(const std::string &filename) :
     _relstring_map.insert(std::make_pair("REL_Y+", RelEvent{REL_Y, true}));
     _relstring_map.insert(std::make_pair("REL_Y-", RelEvent{REL_Y, false}));
 
-    _evtstring_map.insert(std::make_pair("TURN_RIGHT", InputEvent::TURN_RIGHT));
-    _evtstring_map.insert(std::make_pair("TURN_LEFT", InputEvent::TURN_LEFT));
-    _evtstring_map.insert(std::make_pair("SPEED_UP", InputEvent::SPEED_UP));
-    _evtstring_map.insert(std::make_pair("SPEED_DOWN", InputEvent::SPEED_DOWN));
+    _evtstring_map.insert(std::make_pair("TURN_RIGHT", InputEventType::TURN_RIGHT));
+    _evtstring_map.insert(std::make_pair("TURN_LEFT", InputEventType::TURN_LEFT));
+    _evtstring_map.insert(std::make_pair("SPEED_UP", InputEventType::SPEED_UP));
+    _evtstring_map.insert(std::make_pair("SPEED_DOWN", InputEventType::SPEED_DOWN));
 
     std::memset(&_steering_calibration, 0, sizeof(SteeringCalibration));
 

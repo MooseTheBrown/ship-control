@@ -21,6 +21,9 @@
 #ifndef SERVO_CONTROLLER_HPP
 #define SERVO_CONTROLLER_HPP
 
+#include <unordered_map>
+#include <unordered_set>
+
 namespace shipcontrol
 {
 
@@ -84,6 +87,24 @@ public:
     virtual void set_speed(SpeedVal speed) = 0;
     virtual SteeringVal get_steering() = 0;
     virtual void set_steering(SteeringVal steering) = 0;
+
+    static std::string speed_to_str(SpeedVal speed);
+    static SpeedVal str_to_speed(const std::string &str);
+
+    static std::string steering_to_str(SteeringVal steering);
+    static SteeringVal str_to_steering(const std::string &str);
+
+    static bool validate_speed_str(const std::string &str);
+    static bool validate_steering_str(const std::string &str);
+
+private:
+    static std::unordered_map<SpeedVal, std::string> _speed_map;
+    static std::unordered_map<SteeringVal, std::string> _steering_map;
+    static std::unordered_set<std::string> _speed_values;
+    static std::unordered_set<std::string> _steering_values;
+
+    static std::unordered_set<std::string> init_speed_values();
+    static std::unordered_set<std::string> init_steering_values();
 };
 
 } // namespace shipcontrol

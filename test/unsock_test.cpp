@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016 - 2018 Mikhail Sapozhnikov
+ * Copyright (C) 2016 - 2023 Mikhail Sapozhnikov
  *
  * This file is part of ship-control.
  *
@@ -179,7 +179,7 @@ TEST_F(UnsockTest, Command)
 {
     send_command(std::string("turn_left"));
     ASSERT_FALSE(_inputQueue.is_empty());
-    ASSERT_EQ(sc::InputEvent::TURN_LEFT, _inputQueue.pop());
+    ASSERT_EQ(sc::InputEventType::TURN_LEFT, _inputQueue.pop().type);
 }
 
 // multithreaded query test
@@ -220,7 +220,7 @@ TEST_F(UnsockTest, CommandMt)
     ASSERT_FALSE(_inputQueue.is_empty());
     for (int i = 0; i < 10; i++)
     {
-        ASSERT_EQ(sc::InputEvent::SPEED_UP, _inputQueue.pop());
+        ASSERT_EQ(sc::InputEventType::SPEED_UP, _inputQueue.pop().type);
     }
 }
 

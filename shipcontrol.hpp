@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016 - 2018 Mikhail Sapozhnikov
+ * Copyright (C) 2016 - 2023 Mikhail Sapozhnikov
  *
  * This file is part of ship-control.
  *
@@ -74,6 +74,8 @@ protected:
     void turn_left();
     void speed_up();
     void speed_down();
+    void set_speed(const std::string &speed_str);
+    void set_steering(const std::string &steering_str);
     void setup_signals();
 };
 

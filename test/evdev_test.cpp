@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016 Mikhail Sapozhnikov
+ * Copyright (C) 2016 - 2023 Mikhail Sapozhnikov
  *
  * This file is part of ship-control.
  *
@@ -52,11 +52,11 @@ protected:
 
 TestEvdevConfig::TestEvdevConfig()
 {
-    _keymap.insert(std::make_pair(KEY_W, sc::InputEvent::SPEED_UP));
-    _keymap.insert(std::make_pair(KEY_S, sc::InputEvent::SPEED_DOWN));
+    _keymap.insert(std::make_pair(KEY_W, sc::InputEventType::SPEED_UP));
+    _keymap.insert(std::make_pair(KEY_S, sc::InputEventType::SPEED_DOWN));
 
-    _relmap.insert(std::make_pair(sc::RelEvent{REL_X, false}, sc::InputEvent::TURN_LEFT));
-    _relmap.insert(std::make_pair(sc::RelEvent{REL_X, true}, sc::InputEvent::TURN_RIGHT));
+    _relmap.insert(std::make_pair(sc::RelEvent{REL_X, false}, sc::InputEventType::TURN_LEFT));
+    _relmap.insert(std::make_pair(sc::RelEvent{REL_X, true}, sc::InputEventType::TURN_RIGHT));
 }
 
 // test fixture
@@ -181,7 +181,7 @@ TEST_F(EvdevTest, EventTest)
 
     ASSERT_FALSE(_queue.is_empty());
     sc::InputEvent evt = _queue.pop();
-    ASSERT_EQ(sc::InputEvent::SPEED_UP, evt);
+    ASSERT_EQ(sc::InputEventType::SPEED_UP, evt.type);
     ASSERT_TRUE(_queue.is_empty());
 
     // report SPEED_DOWN
@@ -201,7 +201,7 @@ TEST_F(EvdevTest, EventTest)
 
     ASSERT_FALSE(_queue.is_empty());
     evt = _queue.pop();
-    ASSERT_EQ(sc::InputEvent::SPEED_DOWN, evt);
+    ASSERT_EQ(sc::InputEventType::SPEED_DOWN, evt.type);
     ASSERT_TRUE(_queue.is_empty());
 
     // report key up event and verify that it is ignored
@@ -238,7 +238,7 @@ TEST_F(EvdevTest, EventTest)
 
     ASSERT_FALSE(_queue.is_empty());
     evt = _queue.pop();
-    ASSERT_EQ(sc::InputEvent::TURN_LEFT, evt);
+    ASSERT_EQ(sc::InputEventType::TURN_LEFT, evt.type);
     ASSERT_TRUE(_queue.is_empty());
 
     // report right turn
@@ -258,7 +258,7 @@ TEST_F(EvdevTest, EventTest)
 
     ASSERT_FALSE(_queue.is_empty());
     evt = _queue.pop();
-    ASSERT_EQ(sc::InputEvent::TURN_RIGHT, evt);
+    ASSERT_EQ(sc::InputEventType::TURN_RIGHT, evt.type);
     ASSERT_TRUE(_queue.is_empty());
 
     // report Y axis and verify that it is ignored
@@ -302,7 +302,7 @@ TEST_F(EvdevTest, BlockingTest)
     });
 
     sc::InputEvent evt = _queue.pop_blocking();
-    ASSERT_EQ(sc::InputEvent::SPEED_UP, evt);
+    ASSERT_EQ(sc::InputEventType::SPEED_UP, evt.type);
 
     thread.join();
 }

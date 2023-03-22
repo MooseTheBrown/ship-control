@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016 - 2018 Mikhail Sapozhnikov
+ * Copyright (C) 2016 - 2023 Mikhail Sapozhnikov
  *
  * This file is part of ship-control.
  *
@@ -47,7 +47,19 @@ std::string IPCRequestHandler::handleRequest(const std::string &request)
                 if (json_rq.find("cmd") != json_rq.end())
                 {
                     std::string cmd = json_rq["cmd"].get<std::string>();
-                    return handle_cmd(cmd);
+                    std::string data;
+                    if ((cmd == "set_speed") || (cmd == "set_steering"))
+                    {
+                        if (json_rq.find("data") != json_rq.end())
+                        {
+                            data = json_rq["data"].get<std::string>();
+                        }
+                        else
+                        {
+                            throw std::invalid_argument("no data for set_speed or set_steering command");
+                        }
+                    }
+                    return handle_cmd(cmd, data);
                 }
                 else
                 {
@@ -79,29 +91,54 @@ std::string IPCRequestHandler::handleRequest(const std::string &request)
     }
 }
 
-std::string IPCRequestHandler::handle_cmd(const std::string &cmd)
+std::string IPCRequestHandler::handle_cmd(const std::string &cmd, const std::string &data)
 {
-    InputEvent evt = InputEvent::UNKNOWN;
+    InputEvent evt;
+    evt.type = InputEventType::UNKNOWN;
     json json_resp;
 
     if (cmd == "speed_up")
     {
-        evt = InputEvent::SPEED_UP;
+        evt.type = InputEventType::SPEED_UP;
     }
     else if (cmd == "speed_down")
     {
-        evt = InputEvent::SPEED_DOWN;
+        evt.type = InputEventType::SPEED_DOWN;
     }
     else if (cmd == "turn_left")
     {
-        evt = InputEvent::TURN_LEFT;
+        evt.type = InputEventType::TURN_LEFT;
     }
     else if (cmd == "turn_right")
     {
-        evt = InputEvent::TURN_RIGHT;
+        evt.type = InputEventType::TURN_RIGHT;
+    }
+    else if (cmd == "set_speed")
+    {
+        if (ServoController::validate_speed_str(data) == true)
+        {
+            evt.type = InputEventType::SET_SPEED;
+            evt.data = data;
+        }
+        else
+        {
+            evt.type = InputEventType::UNKNOWN;
+        }
+    }
+    else if (cmd == "set_steering")
+    {
+        if (ServoController::validate_steering_str(data) == true)
+        {
+            evt.type = InputEventType::SET_STEERING;
+            evt.data = data;
+        }
+        else
+        {
+            evt.type = InputEventType::UNKNOWN;
+        }
     }
 
-    if (evt != InputEvent::UNKNOWN)
+    if (evt.type != InputEventType::UNKNOWN)
     {
         _input_queue.push(evt);
         json_resp["status"] = "ok";
@@ -120,112 +157,10 @@ std::string IPCRequestHandler::handle_query()
 {
     json j;
 
-    j["speed"] = speed_to_str(_data_provider.get_speed());
-    j["steering"] = steering_to_str(_data_provider.get_steering());
+    j["speed"] = ServoController::speed_to_str(_data_provider.get_speed());
+    j["steering"] = ServoController::steering_to_str(_data_provider.get_steering());
 
     return j.dump();
-}
-
-std::string IPCRequestHandler::speed_to_str(SpeedVal speed)
-{
-    switch (speed)
-    {
-    case SpeedVal::STOP:
-        return std::string("stop");
-    case SpeedVal::FWD10:
-        return std::string("fwd10");
-    case SpeedVal::FWD20:
-        return std::string("fwd20");
-    case SpeedVal::FWD30:
-        return std::string("fwd30");
-    case SpeedVal::FWD40:
-        return std::string("fwd40");
-    case SpeedVal::FWD50:
-        return std::string("fwd50");
-    case SpeedVal::FWD60:
-        return std::string("fwd60");
-    case SpeedVal::FWD70:
-        return std::string("fwd70");
-    case SpeedVal::FWD80:
-        return std::string("fwd80");
-    case SpeedVal::FWD90:
-        return std::string("fwd90");
-    case SpeedVal::FWD100:
-        return std::string("fwd100");
-    case SpeedVal::REV10:
-        return std::string("rev10");
-    case SpeedVal::REV20:
-        return std::string("rev20");
-    case SpeedVal::REV30:
-        return std::string("rev30");
-    case SpeedVal::REV40:
-        return std::string("rev40");
-    case SpeedVal::REV50:
-        return std::string("rev50");
-    case SpeedVal::REV60:
-        return std::string("rev60");
-    case SpeedVal::REV70:
-        return std::string("rev70");
-    case SpeedVal::REV80:
-        return std::string("rev80");
-    case SpeedVal::REV90:
-        return std::string("rev90");
-    case SpeedVal::REV100:
-        return std::string("rev100");
-    default:
-        return std::string("");
-    }
-}
-
-std::string IPCRequestHandler::steering_to_str(SteeringVal steering)
-{
-    switch (steering)
-    {
-    case SteeringVal::STRAIGHT:
-        return std::string("straight");
-    case SteeringVal::RIGHT10:
-        return std::string("right10");
-    case SteeringVal::RIGHT20:
-        return std::string("right20");
-    case SteeringVal::RIGHT30:
-        return std::string("right30");
-    case SteeringVal::RIGHT40:
-        return std::string("right40");
-    case SteeringVal::RIGHT50:
-        return std::string("right50");
-    case SteeringVal::RIGHT60:
-        return std::string("right60");
-    case SteeringVal::RIGHT70:
-        return std::string("right70");
-    case SteeringVal::RIGHT80:
-        return std::string("right80");
-    case SteeringVal::RIGHT90:
-        return std::string("right90");
-    case SteeringVal::RIGHT100:
-        return std::string("right100");
-    case SteeringVal::LEFT10:
-        return std::string("left10");
-    case SteeringVal::LEFT20:
-        return std::string("left20");
-    case SteeringVal::LEFT30:
-        return std::string("left30");
-    case SteeringVal::LEFT40:
-        return std::string("left40");
-    case SteeringVal::LEFT50:
-        return std::string("left50");
-    case SteeringVal::LEFT60:
-        return std::string("left60");
-    case SteeringVal::LEFT70:
-        return std::string("left70");
-    case SteeringVal::LEFT80:
-        return std::string("left80");
-    case SteeringVal::LEFT90:
-        return std::string("left90");
-    case SteeringVal::LEFT100:
-        return std::string("left100");
-    default:
-        return std::string("");
-    }
 }
 
 } // namespace shipcontrol

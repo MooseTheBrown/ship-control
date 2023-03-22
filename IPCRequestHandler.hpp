@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016 - 2018 Mikhail Sapozhnikov
+ * Copyright (C) 2016 - 2023 Mikhail Sapozhnikov
  *
  * This file is part of ship-control.
  *
@@ -33,7 +33,8 @@ namespace shipcontrol
  * JSON
  * {
  *     "type": "cmd" or "query",
- *     "cmd" (in case of cmd type): "speed_up" or "speed_down" or "turn_left" or "turn_right"
+ *     "cmd" (in case of cmd type): one of "speed_up", "speed_down", "turn_left", "turn_right", "set_speed", "set_steering"
+ *     "data" (optional): target speed or target steering in case of "set_speed" or "set_steering" command
  * }
  *
  * IPC command response format:
@@ -58,10 +59,8 @@ public:
     IPCRequestHandler(InputQueue &queue, DataProvider &provider);
     std::string handleRequest(const std::string &request);
 protected:
-    std::string handle_cmd(const std::string &cmd);
+    std::string handle_cmd(const std::string &cmd, const std::string &data);
     std::string handle_query();
-    std::string speed_to_str(SpeedVal speed);
-    std::string steering_to_str(SteeringVal steering);
 
     InputQueue &_input_queue;
     DataProvider &_data_provider;
