@@ -195,9 +195,9 @@ void Config::parse(const std::string &filename)
     in >> j;
 
     // get engine channels
-    if (j.find("engines") != j.end())
+    if (j.find("maestro_engines") != j.end())
     {
-        auto engines = j["engines"];
+        auto engines = j["maestro_engines"];
         for (auto engine : engines)
         {
             MaestroEngine me{0, true};
@@ -240,23 +240,15 @@ void Config::parse(const std::string &filename)
             _engines.push_back(me);
         }
     }
-    else
-    {
-        _is_ok = false;
-    }
 
     // get steering channels
-    if (j.find("steering") != j.end())
+    if (j.find("maestro_steering") != j.end())
     {
-        auto steering = j["steering"];
+        auto steering = j["maestro_steering"];
         for (auto st : steering)
         {
             _steering.push_back(st);
         }
-    }
-    else
-    {
-        _is_ok = false;
     }
 
     // get maestro device
@@ -265,15 +257,11 @@ void Config::parse(const std::string &filename)
         auto maestro_dev = j["maestro_device"];
         _maestro_dev = maestro_dev.get<std::string>();
     }
-    else
-    {
-        _is_ok = false;
-    }
 
     // get maestro calibration data
-    if (j.find("steering_calibration") != j.end())
+    if (j.find("maestro_steering_calibration") != j.end())
     {
-        auto calibration = j["steering_calibration"];
+        auto calibration = j["maestro_steering_calibration"];
         if (calibration.find("straight") != calibration.end())
         {
             _steering_calibration.straight = calibration["straight"].get<int>();
@@ -291,15 +279,11 @@ void Config::parse(const std::string &filename)
             _is_ok = false;
         }
     }
-    else
-    {
-        _is_ok = false;
-    }
 
     // direction channels config
-    if (j.find("direction") != j.end())
+    if (j.find("maestro_direction") != j.end())
     {
-        auto direction = j["direction"];
+        auto direction = j["maestro_direction"];
         if (direction.find("high") != direction.end())
         {
             _dir_high = direction["high"].get<int>();
@@ -350,10 +334,6 @@ void Config::parse(const std::string &filename)
             }
         }
     }
-    else
-    {
-        _is_ok = false;
-    }
 
     // get relmap
     if (j.find("relmap") != j.end())
@@ -381,10 +361,6 @@ void Config::parse(const std::string &filename)
                 _is_ok = false;
             }
         }
-    }
-    else
-    {
-        _is_ok = false;
     }
 
     // get unix socket name
@@ -430,7 +406,70 @@ void Config::parse(const std::string &filename)
     }
     else
     {
-        _is_ok = false;
+        _logLevel = LogLevel::NOTICE;
+    }
+
+    // get GPIO engine settings
+    if (j.find("gpio_engines") != j.end())
+    {
+        auto gpio_engines = j["gpio_engines"];
+        for (auto gpio_engine : gpio_engines)
+        {
+            GPIOEngineConfig gpio_engine_config;
+            if (gpio_engine.find("chip_path") != gpio_engine.end())
+            {
+                gpio_engine_config.chip_path = gpio_engine["chip_path"].get<std::string>();
+            }
+            else
+            {
+                _is_ok = false;
+            }
+            if (gpio_engine.find("engine_line") != gpio_engine.end())
+            {
+                gpio_engine_config.engine_line = gpio_engine["engine_line"].get<int>();
+            }
+            else
+            {
+                _is_ok = false;
+            }
+            if (gpio_engine.find("dir_line") != gpio_engine.end())
+            {
+                gpio_engine_config.dir_line = gpio_engine["dir_line"].get<int>();
+            }
+            if (gpio_engine.find("pwm_period") != gpio_engine.end())
+            {
+                gpio_engine_config.pwm_period = gpio_engine["pwm_period"].get<int>();
+            }
+            else
+            {
+                _is_ok = false;
+            }
+            if (gpio_engine.find("rev_mode") != gpio_engine.end())
+            {
+                std::string reverse_mode = gpio_engine["rev_mode"].get<std::string>();
+                if (reverse_mode == "same_line")
+                {
+                    gpio_engine_config.reverse_mode = GPIOReverseMode::SAME_LINE;
+                }
+                else if (reverse_mode == "dedicated_line")
+                {
+                    gpio_engine_config.reverse_mode = GPIOReverseMode::DEDICATED_LINE;
+                }
+                else if (reverse_mode == "no_reverse")
+                {
+                    gpio_engine_config.reverse_mode = GPIOReverseMode::NO_REVERSE;
+                }
+                else
+                {
+                    _is_ok = false;
+                }
+            }
+            else
+            {
+                _is_ok = false;
+            }
+            _gpio_engine_configs.push_back(gpio_engine_config);
+        }
     }
 }
 

@@ -18,47 +18,58 @@
  *
  */
 
-#ifndef MAESTRO_CONTROLLER_HPP
-#define MAESTRO_CONTROLLER_HPP
+#ifndef GPIO_CONTROLLER_HPP
+#define GPIO_CONTROLLER_HPP
 
-#include "MaestroConfig.hpp"
+#include <string>
+
+#include <gpiod.hpp>
+
 #include "ServoController.hpp"
 #include "Log.hpp"
-
-#include <vector>
+#include "GPIOEngineConfig.hpp"
+#include "GPIOPWMThread.hpp"
 
 namespace shipcontrol
 {
 
-class MaestroController : public ServoController
+// controller of a single PWM-over-GPIO-driven engine
+class GPIOEngineController : public ServoController
 {
 public:
-    MaestroController(MaestroConfig &config);
-    virtual ~MaestroController();
+    GPIOEngineController(const GPIOEngineConfig &config);
+    virtual ~GPIOEngineController();
+
+    // ServoController implementation
     SpeedVal get_speed();
     void set_speed(SpeedVal speed);
     SteeringVal get_steering();
     void set_steering(SteeringVal steering);
 
+    void start();
+    void stop();
+
 protected:
-    MaestroConfig &_config;
-    const char *_dev;
-    std::vector<MaestroEngine> _engines;
-    std::vector<int> _steering;
-    SteeringCalibration _steering_calibration;
-    int _dir_high;
-    int _dir_low;
-    int _fd;
-    Log *_log;
+    // GPIO device path
+    std::string _chip_path;
+    // engine line number
+    unsigned int _engine_line_num;
+    // direction line number
+    unsigned int _dir_line_num;
+    // engine PWM period - microseconds between consecutive high level signals
+    unsigned int _pwm_period;
+    GPIOReverseMode _rev_mode;
+    // current engine speed
     SpeedVal _cur_speed;
-    SteeringVal _cur_steering;
 
-    int speed_to_int(SpeedVal speed, const MaestroEngine &engine);
-    int steering_to_int(SteeringVal steering);
+    GPIOPWMThread *_pwm_thread;
 
-    bool is_sane();
+    gpiod::chip *_gpio_chip;
+    gpiod::line _dir_line;
+
+    Log *_log;
 };
 
 } // namespace shipcontrol
 
-#endif // MAESTRO_CONTROLLER_HPP
+#endif // GPIO_CONTROLLER_HPP

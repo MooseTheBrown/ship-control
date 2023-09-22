@@ -21,6 +21,8 @@
 #ifndef SHIPCONTROL_HPP
 #define SHIPCONTROL_HPP
 
+#include <vector>
+
 #include "Config.hpp"
 #include "InputQueue.hpp"
 #include "EvdevReader.hpp"
@@ -57,7 +59,6 @@ protected:
     Config *_config;
     EvdevReader *_evdevReader;
     InputQueue _inputQueue;
-    MaestroController *_controller;
     std::string _psmoveinput_dev;
     Log *_log;
     ConsoleLog _clog;
@@ -67,6 +68,7 @@ protected:
     IPCRequestHandler *_ipcHandler;
     UnixListener *_unixListener;
     bool _stop;
+    std::vector<ServoController*> _servo_controllers;
 
     int init();
     void find_input_device(const char *input_name, std::string &result);

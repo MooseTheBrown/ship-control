@@ -50,8 +50,17 @@ set (SHIPCONTROL_SRC Log.cpp
                      UnixListener.cpp
                      IPCClient.cpp
                      ServoController.cpp
+                     GPIOEngineController.cpp
+                     GPIOPWMThread.cpp
                      shipcontrol.cpp)
+
+find_library (GPIOD_LIB NAMES gpiodcxx)
+if (${GPIOD_LIB} EQUAL "GPIOD_LIB-NOTFOUND")
+    message(FATAL_ERROR "libgpiodcxx not found")
+endif (${GPIOD_LIB} EQUAL "GPIOD_LIB-NOTFOUND")
+
 add_executable (ship-control ${SHIPCONTROL_SRC} main.cpp)
+target_link_libraries (ship-control ${GPIOD_LIB})
 
 install (TARGETS ship-control DESTINATION bin)
 install (FILES shipcontrol.conf DESTINATION /etc)
@@ -69,5 +78,5 @@ if (BUILD_TESTS)
         message(FATAL_ERROR "Google Test not found")
     endif (${GTEST_LIB} EQUAL "GTEST_LIB-NOTFOUND")
     add_executable (ship-control-test ${TESTS_SRC})
-    target_link_libraries (ship-control-test ${GTEST_LIB})
+    target_link_libraries (ship-control-test ${GTEST_LIB} ${GPIOD_LIB})
 endif (BUILD_TESTS)

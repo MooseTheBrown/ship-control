@@ -1,5 +1,5 @@
 {
-    "engines": [
+    "maestro_engines": [
     {
         "channel": 8,
         "fwd": true,
@@ -14,16 +14,37 @@
         "step": 300
     }
     ],
-    "steering": [4],
+    "maestro_steering": [4],
     "maestro_device": "/dev/ttyACM0",
-    "steering_calibration": {
+    "maestro_steering_calibration": {
         "straight": 1500,
         "step": 80
     },
-    "direction": {
+    "maestro_direction": {
         "high": 1900,
         "low": 800
     },
+    "gpio_engines": [
+    {
+        "chip_path": "/dev/gpiochip0",
+        "engine_line": 3,
+        "pwm_period": 100,
+        "rev_mode": "same_line"
+    },
+    {
+        "chip_path": "/dev/gpiochip0",
+        "engine_line": 1,
+        "dir_line": 2,
+        "pwm_period": 133,
+        "rev_mode": "dedicated_line"
+    },
+    {
+        "chip_path": "/dev/gpiochip1",
+        "engine_line": 6,
+        "pwm_period": 80,
+        "rev_mode": "no_reverse"
+    }
+    ],
     "keymap": {
         "KEY_1": "SPEED_UP",
         "KEY_2": "SPEED_DOWN"

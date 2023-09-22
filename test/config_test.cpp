@@ -85,6 +85,22 @@ TEST(Config, ConfigTest)
     std::string unix_socket = config.get_unix_socket_name();
     ASSERT_EQ("/tmp/scsocket", unix_socket);
 
+    std::vector<sc::GPIOEngineConfig> gpio_engine_configs = config.get_gpio_engine_configs();
+    ASSERT_EQ(3, gpio_engine_configs.size());
+    ASSERT_STREQ("/dev/gpiochip0", gpio_engine_configs[0].chip_path.c_str());
+    ASSERT_EQ(3, gpio_engine_configs[0].engine_line);
+    ASSERT_EQ(100, gpio_engine_configs[0].pwm_period);
+    ASSERT_EQ(sc::GPIOReverseMode::SAME_LINE, gpio_engine_configs[0].reverse_mode);
+    ASSERT_STREQ("/dev/gpiochip0", gpio_engine_configs[1].chip_path.c_str());
+    ASSERT_EQ(1, gpio_engine_configs[1].engine_line);
+    ASSERT_EQ(2, gpio_engine_configs[1].dir_line);
+    ASSERT_EQ(133, gpio_engine_configs[1].pwm_period);
+    ASSERT_EQ(sc::GPIOReverseMode::DEDICATED_LINE, gpio_engine_configs[1].reverse_mode);
+    ASSERT_STREQ("/dev/gpiochip1", gpio_engine_configs[2].chip_path.c_str());
+    ASSERT_EQ(6, gpio_engine_configs[2].engine_line);
+    ASSERT_EQ(80, gpio_engine_configs[2].pwm_period);
+    ASSERT_EQ(sc::GPIOReverseMode::NO_REVERSE, gpio_engine_configs[2].reverse_mode);
+
     std::vector<sc::LogBackendType> log_backends = config.get_log_backends();
     ASSERT_EQ(2, log_backends.size());
     ASSERT_EQ(sc::LogBackendType::CONSOLE, log_backends[0]);

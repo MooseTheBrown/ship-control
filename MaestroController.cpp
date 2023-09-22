@@ -215,18 +215,6 @@ bool MaestroController::is_sane()
         return false;
     }
 
-    if (_engines.size() == 0)
-    {
-        _log->write(LogLevel::ERROR, "MaestroController isn't sane: no engines\n");
-        return false;
-    }
-
-    if (_steering.size() == 0)
-    {
-        _log->write(LogLevel::ERROR, "MaestroController isn't sane: no steering\n");
-        return false;
-    }
-
     return true;
 }
 
