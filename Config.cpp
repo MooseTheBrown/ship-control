@@ -416,6 +416,7 @@ void Config::parse(const std::string &filename)
         for (auto gpio_engine : gpio_engines)
         {
             GPIOEngineConfig gpio_engine_config;
+
             if (gpio_engine.find("chip_path") != gpio_engine.end())
             {
                 gpio_engine_config.chip_path = gpio_engine["chip_path"].get<std::string>();
@@ -435,6 +436,10 @@ void Config::parse(const std::string &filename)
             if (gpio_engine.find("dir_line") != gpio_engine.end())
             {
                 gpio_engine_config.dir_line = gpio_engine["dir_line"].get<int>();
+            }
+            else
+            {
+                gpio_engine_config.dir_line = 0;
             }
             if (gpio_engine.find("pwm_period") != gpio_engine.end())
             {
