@@ -34,7 +34,7 @@ extern void signal_handler(int sig);
 namespace shipcontrol
 {
 
-ShipControl::ShipControl() :
+ShipControl::ShipControl(int argc, char **argv) :
     _config(nullptr),
     _evdevReader(nullptr),
     _speed(SpeedVal::STOP),
@@ -86,6 +86,11 @@ int ShipControl::run()
     _evdevReader->start();
     _unixListener->start();
 
+    for (ServoController *controller : _servo_controllers)
+    {
+        controller->start();
+    }
+
     // event handling loop
     while (true)
     {
@@ -118,6 +123,11 @@ int ShipControl::run()
         default:
             break;
         }
+    }
+
+    for (ServoController *controller : _servo_controllers)
+    {
+        controller->stop();
     }
 
     _evdevReader->stop();

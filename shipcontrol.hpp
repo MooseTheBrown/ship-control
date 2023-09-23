@@ -45,7 +45,7 @@ namespace shipcontrol
 class ShipControl : public DataProvider
 {
 public:
-    ShipControl();
+    ShipControl(int argc, char **argv);
     virtual ~ShipControl();
 
     int run();

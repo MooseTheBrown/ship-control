@@ -38,7 +38,7 @@ GPIOPWMThread::GPIOPWMThread(const std::string &chip_path,
 {
     _log = Log::getInstance();
     _log->write(LogLevel::DEBUG, "GPIOPWMThread ctor, chip_path=%s, engine_line=%d, pwm_period=%d\n",
-            chip_path, engine_line, pwm_period);
+            chip_path.c_str(), engine_line, pwm_period);
 }
 
 GPIOPWMThread::~GPIOPWMThread()

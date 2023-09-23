@@ -40,6 +40,9 @@ public:
     SteeringVal get_steering();
     void set_steering(SteeringVal steering);
 
+    virtual void start() {}
+    virtual void stop() {}
+
 protected:
     MaestroConfig &_config;
     const char *_dev;

@@ -46,8 +46,8 @@ public:
     SteeringVal get_steering();
     void set_steering(SteeringVal steering);
 
-    void start();
-    void stop();
+    virtual void start();
+    virtual void stop();
 
 protected:
     // GPIO device path

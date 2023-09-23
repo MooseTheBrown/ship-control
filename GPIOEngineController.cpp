@@ -38,7 +38,7 @@ GPIOEngineController::GPIOEngineController(const GPIOEngineConfig &config) :
     _log = Log::getInstance();
 
     _log->write(LogLevel::DEBUG, "GPIOEngineController ctor, _chip_path=%s, _engine_line_num=%d, _dir_line_num=%d, _pwm_period=%d, _rev_mode=%d\n",
-            _chip_path, _engine_line_num, _dir_line_num,
+            _chip_path.c_str(), _engine_line_num, _dir_line_num,
             _pwm_period, static_cast<int>(_rev_mode));
 
     _pwm_thread = new GPIOPWMThread(_chip_path, _engine_line_num, _pwm_period);

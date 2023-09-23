@@ -84,7 +84,10 @@ enum class SteeringVal
 class ServoController
 {
 public:
-    virtual ~ServoController() {};
+    virtual ~ServoController() {}
+
+    virtual void start() = 0;
+    virtual void stop() = 0;
 
     virtual SpeedVal get_speed() = 0;
     virtual void set_speed(SpeedVal speed) = 0;

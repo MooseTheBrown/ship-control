@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016 Mikhail Sapozhnikov
+ * Copyright (C) 2016 - 2023 Mikhail Sapozhnikov
  *
  * This file is part of ship-control.
  *
@@ -24,7 +24,7 @@ static shipcontrol::ShipControl *theControl;
 
 int main(int argc, char **argv)
 {
-    theControl = new shipcontrol::ShipControl();
+    theControl = new shipcontrol::ShipControl(argc, argv);
     int ret = theControl->run();
     delete theControl;
     return ret;
