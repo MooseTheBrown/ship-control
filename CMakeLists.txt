@@ -17,7 +17,7 @@
 # along with ship-control.  If not, see <http://www.gnu.org/licenses/>.
 #
 
-cmake_minimum_required (VERSION 2.6)
+cmake_minimum_required (VERSION 3.0)
 
 project (ship-control)
 
@@ -59,8 +59,13 @@ if (${GPIOD_LIB} EQUAL "GPIOD_LIB-NOTFOUND")
     message(FATAL_ERROR "libgpiodcxx not found")
 endif (${GPIOD_LIB} EQUAL "GPIOD_LIB-NOTFOUND")
 
+find_library (BOOST_PO_LIB NAMES boost_program_options)
+if (${BOOST_PO_LIB} EQUAL "BOOST_PO_LIB-NOTFOUND")
+    message(FATAL_ERROR "boost_program_options not found")
+endif (${BOOST_PO_LIB} EQUAL "BOOST_PO_LIB-NOTFOUND")
+
 add_executable (ship-control ${SHIPCONTROL_SRC} main.cpp)
-target_link_libraries (ship-control ${GPIOD_LIB})
+target_link_libraries (ship-control ${GPIOD_LIB} ${BOOST_PO_LIB})
 
 install (TARGETS ship-control DESTINATION bin)
 install (FILES shipcontrol.conf DESTINATION /etc)
@@ -78,5 +83,5 @@ if (BUILD_TESTS)
         message(FATAL_ERROR "Google Test not found")
     endif (${GTEST_LIB} EQUAL "GTEST_LIB-NOTFOUND")
     add_executable (ship-control-test ${TESTS_SRC})
-    target_link_libraries (ship-control-test ${GTEST_LIB} ${GPIOD_LIB})
+    target_link_libraries (ship-control-test ${GTEST_LIB} ${GPIOD_LIB} ${BOOST_PO_LIB})
 endif (BUILD_TESTS)

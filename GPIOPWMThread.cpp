@@ -20,6 +20,7 @@
 
 #include <thread>
 #include <chrono>
+#include <exception>
 
 #include <gpiod.hpp>
 
@@ -49,42 +50,44 @@ GPIOPWMThread::~GPIOPWMThread()
 void GPIOPWMThread::run()
 {
     _log->write(LogLevel::DEBUG, "GPIOPWMThread::run()\n");
-    gpiod::chip chip(_chip_path);
-    if (!chip)
-    {
-        _log->write(LogLevel::ERROR, "GPIOPWMThread failed to open GPIO device %s\n", _chip_path);
-        return;
-    }
 
-    gpiod::line line = chip.get_line(_engine_line);
-    line.request({"shipcontrol::GPIOPWMThread",
-            gpiod::line_request::DIRECTION_OUTPUT,
-            0},
-            0);
-
-    while (true)
+    try
     {
-        if (need_to_stop() == true)
+        gpiod::chip chip(_chip_path);
+        gpiod::line line = chip.get_line(_engine_line);
+        line.request({"shipcontrol::GPIOPWMThread",
+                gpiod::line_request::DIRECTION_OUTPUT,
+                0},
+                0);
+
+        while (true)
         {
-            _log->write(LogLevel::DEBUG, "GPIOPWMThread stopping\n");
-            break;
+            if (need_to_stop() == true)
+            {
+                _log->write(LogLevel::DEBUG, "GPIOPWMThread stopping\n");
+                break;
+            }
+
+            unsigned int cur_pwm_duration = _pwm_duration;
+
+            if (cur_pwm_duration != 0)
+            {
+                // set GPIO high level and wait for PWM duration
+                line.set_value(1);
+                std::this_thread::sleep_for(std::chrono::microseconds(cur_pwm_duration));
+            }
+
+            // set GPIO low level and wait for the next iteration
+            line.set_value(0);
+            std::this_thread::sleep_for(std::chrono::microseconds(_pwm_period - cur_pwm_duration));
         }
 
-        unsigned int cur_pwm_duration = _pwm_duration;
-
-        if (cur_pwm_duration != 0)
-        {
-            // set GPIO high level and wait for PWM duration
-            line.set_value(1);
-            std::this_thread::sleep_for(std::chrono::microseconds(cur_pwm_duration));
-        }
-
-        // set GPIO low level and wait for the next iteration
-        line.set_value(0);
-        std::this_thread::sleep_for(std::chrono::microseconds(_pwm_period - cur_pwm_duration));
+        line.release();
     }
-
-    line.release();
+    catch (const std::exception &e)
+    {
+        _log->write(LogLevel::ERROR, "GPIOPWMThread caught exception: %s\n", e.what());
+    }
 }
 
 void GPIOPWMThread::set_pwm_duration(unsigned int pwm_duration)

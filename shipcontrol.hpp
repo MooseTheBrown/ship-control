@@ -39,16 +39,28 @@ namespace shipcontrol
 
 #define RETVAL_OK               0
 #define RETVAL_INVALID_CONFIG   1
+#define RETVAL_INVALID_CMDLINE  2
 
 #define PSMOVEINPUT_DEVICE_NAME     "psmoveinput"
+
+// ship-control mode of operation
+enum class ShipControlMode
+{
+    // normal mode, run event processing loop
+    NORMAL = 0,
+    // execute given commands, wait for arbitrary user input and exit
+    COMMAND,
+    // print help message and exit
+    HELP
+};
 
 class ShipControl : public DataProvider
 {
 public:
-    ShipControl(int argc, char **argv);
+    ShipControl();
     virtual ~ShipControl();
 
-    int run();
+    int run(int argc, char **argv);
     void interrupt();
 
     // DataProvider implementation
@@ -69,7 +81,12 @@ protected:
     UnixListener *_unixListener;
     bool _stop;
     std::vector<ServoController*> _servo_controllers;
+    ShipControlMode _mode;
+    // used in command mode only
+    std::string _cmd_speed;
+    std::string _cmd_steering;
 
+    int handle_cmd_line(int argc, char **argv);
     int init();
     void find_input_device(const char *input_name, std::string &result);
     void turn_right();

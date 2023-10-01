@@ -24,8 +24,8 @@ static shipcontrol::ShipControl *theControl;
 
 int main(int argc, char **argv)
 {
-    theControl = new shipcontrol::ShipControl(argc, argv);
-    int ret = theControl->run();
+    theControl = new shipcontrol::ShipControl();
+    int ret = theControl->run(argc, argv);
     delete theControl;
     return ret;
 }

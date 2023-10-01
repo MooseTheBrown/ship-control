@@ -45,20 +45,27 @@ GPIOEngineController::GPIOEngineController(const GPIOEngineConfig &config) :
 
     if (_rev_mode == GPIOReverseMode::DEDICATED_LINE)
     {
-        _gpio_chip = new gpiod::chip(_chip_path); 
-        if (!_gpio_chip)
+        try
         {
-            _log->write(LogLevel::ERROR,
-                    "GPIOEngineController failed to open gpio chip at path %s\n",
-                    _chip_path);
-            return;
-        }
+            _gpio_chip = new gpiod::chip(_chip_path);
+            if (!_gpio_chip)
+            {
+                _log->write(LogLevel::ERROR,
+                        "GPIOEngineController failed to open gpio chip at path %s\n",
+                        _chip_path);
+                return;
+            }
 
-        _dir_line = _gpio_chip->get_line(_dir_line_num);
-        _dir_line.request({"shipcontrol::GPIOEngineController",
-               gpiod::line_request::DIRECTION_OUTPUT,
-               0},
-               0);
+            _dir_line = _gpio_chip->get_line(_dir_line_num);
+            _dir_line.request({"shipcontrol::GPIOEngineController",
+                   gpiod::line_request::DIRECTION_OUTPUT,
+                   0},
+                   0);
+        }
+        catch (const std::exception &e)
+        {
+            _log->write(LogLevel::ERROR, "GPIOEngineController caught exception: %s\n", e.what());
+        }
     }
 }
 

@@ -25,23 +25,31 @@
 #include <signal.h>
 #include <unistd.h>
 #include <cstring>
+#include <iostream>
+
+#include <boost/program_options.hpp>
 
 #include "shipcontrol.hpp"
 #include "GPIOEngineController.hpp"
 
 extern void signal_handler(int sig);
 
+namespace po = boost::program_options;
+
 namespace shipcontrol
 {
 
-ShipControl::ShipControl(int argc, char **argv) :
+ShipControl::ShipControl() :
     _config(nullptr),
     _evdevReader(nullptr),
     _speed(SpeedVal::STOP),
     _steering(SteeringVal::STRAIGHT),
     _ipcHandler(nullptr),
     _unixListener(nullptr),
-    _stop(false)
+    _stop(false),
+    _mode(ShipControlMode::NORMAL),
+    _cmd_speed(""),
+    _cmd_steering("")
 {
     _log = Log::getInstance();
 }
@@ -74,9 +82,65 @@ ShipControl::~ShipControl()
     Log::release();
 }
 
-int ShipControl::run()
+int ShipControl::handle_cmd_line(int argc, char **argv)
 {
-    int ret = init();
+    try
+    {
+        po::variables_map opts;
+        po::options_description opt_descr("Available options:");
+
+        opt_descr.add_options()
+            ("help", "print help message")
+            ("speed", po::value<std::string>(), "set speed")
+            ("steering", po::value<std::string>(), "set steering");
+
+        po::store(po::parse_command_line(argc, argv, opt_descr), opts);
+        po::notify(opts);
+
+        if (opts.count("help"))
+        {
+            _mode = ShipControlMode::HELP;
+            std::cout << "Usage: " << argv[0] << " [options]\n";
+            std::cout << opt_descr << "\n";
+            return RETVAL_OK;
+        }
+
+        if (opts.count("speed"))
+        {
+            _cmd_speed = opts["speed"].as<std::string>();
+            _mode = ShipControlMode::COMMAND;
+        }
+
+        if (opts.count("steering"))
+        {
+            _cmd_steering = opts["steering"].as<std::string>();
+            _mode = ShipControlMode::COMMAND;
+        }
+
+        return RETVAL_OK;
+    }
+    catch (const std::exception &e)
+    {
+        std::cout << e.what() << "\n";
+        return RETVAL_INVALID_CMDLINE;
+    }
+}
+
+int ShipControl::run(int argc, char **argv)
+{
+    int ret = handle_cmd_line(argc, argv);
+    if (ret != RETVAL_OK)
+    {
+        return ret;
+    }
+
+    if (_mode == ShipControlMode::HELP)
+    {
+        // help message has already been printed, just quit
+        return RETVAL_OK;
+    }
+
+    ret = init();
 
     if (ret != RETVAL_OK)
     {
@@ -91,38 +155,49 @@ int ShipControl::run()
         controller->start();
     }
 
-    // event handling loop
-    while (true)
+    if (_mode == ShipControlMode::NORMAL)
     {
-        if (_stop)
+        // event handling loop
+        while (true)
         {
-            break;
-        }
+            if (_stop)
+            {
+                break;
+            }
 
-        InputEvent evt = _inputQueue.pop_blocking();
-        switch (evt.type)
-        {
-        case InputEventType::TURN_RIGHT:
-            turn_right();
-            break;
-        case InputEventType::TURN_LEFT:
-            turn_left();
-            break;
-        case InputEventType::SPEED_UP:
-            speed_up();
-            break;
-        case InputEventType::SPEED_DOWN:
-            speed_down();
-            break;
-        case InputEventType::SET_SPEED:
-            set_speed(evt.data);
-            break;
-        case InputEventType::SET_STEERING:
-            set_steering(evt.data);
-            break;
-        default:
-            break;
+            InputEvent evt = _inputQueue.pop_blocking();
+            switch (evt.type)
+            {
+            case InputEventType::TURN_RIGHT:
+                turn_right();
+                break;
+            case InputEventType::TURN_LEFT:
+                turn_left();
+                break;
+            case InputEventType::SPEED_UP:
+                speed_up();
+                break;
+            case InputEventType::SPEED_DOWN:
+                speed_down();
+                break;
+            case InputEventType::SET_SPEED:
+                set_speed(evt.data);
+                break;
+            case InputEventType::SET_STEERING:
+                set_steering(evt.data);
+                break;
+            default:
+                break;
+            }
         }
+    }
+    else
+    {
+        // command mode
+        set_speed(_cmd_speed);
+        set_steering(_cmd_steering);
+        std::cout << "Press any key to exit\n";
+        std::cin.get();
     }
 
     for (ServoController *controller : _servo_controllers)
