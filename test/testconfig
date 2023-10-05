@@ -43,6 +43,14 @@
         "engine_line": 6,
         "pwm_period": 80,
         "rev_mode": "no_reverse"
+    },
+    {
+        "chip_path": "/dev/gpiochip1",
+        "syspwm_path": "/sys/class/pwm/pwmchip0",
+        "syspwm_num": 0,
+        "dir_line": 11,
+        "pwm_period": 10,
+        "rev_mode": "dedicated_line"
     }
     ],
     "keymap": {

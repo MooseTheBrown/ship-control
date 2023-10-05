@@ -61,6 +61,9 @@ protected:
     GPIOReverseMode _rev_mode;
     // current engine speed
     SpeedVal _cur_speed;
+    // full path to sysfs PWM line
+    // controller runs in HW PWM mode if this is not empty
+    std::string _syspwm_path;
 
     GPIOPWMThread *_pwm_thread;
 
@@ -68,6 +71,8 @@ protected:
     gpiod::line _dir_line;
 
     Log *_log;
+
+    void sysfs_write(const std::string &path, const std::string &value);
 };
 
 } // namespace shipcontrol

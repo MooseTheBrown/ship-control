@@ -19,6 +19,11 @@
  */
 
 #include <cstdlib>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+#include <unistd.h>
+#include <errno.h>
 
 #include "GPIOEngineController.hpp"
 
@@ -27,7 +32,8 @@ namespace shipcontrol
 
 GPIOEngineController::GPIOEngineController(const GPIOEngineConfig &config) :
     _cur_speed(SpeedVal::STOP),
-    _gpio_chip(nullptr)
+    _gpio_chip(nullptr),
+    _syspwm_path("")
 {
     _chip_path = config.chip_path;
     _engine_line_num = config.engine_line;
@@ -41,7 +47,18 @@ GPIOEngineController::GPIOEngineController(const GPIOEngineConfig &config) :
             _chip_path.c_str(), _engine_line_num, _dir_line_num,
             _pwm_period, static_cast<int>(_rev_mode));
 
-    _pwm_thread = new GPIOPWMThread(_chip_path, _engine_line_num, _pwm_period);
+    if (config.syspwm_path != "")
+    {
+        // HW PWM mode
+        _pwm_thread = nullptr;
+        _syspwm_path = config.syspwm_path + "/pwm" + std::to_string(config.syspwm_num);
+        sysfs_write(config.syspwm_path + "/export", std::to_string(config.syspwm_num));
+    }
+    else
+    {
+        // SW PWM mode
+        _pwm_thread = new GPIOPWMThread(_chip_path, _engine_line_num, _pwm_period);
+    }
 
     if (_rev_mode == GPIOReverseMode::DEDICATED_LINE)
     {
@@ -112,7 +129,15 @@ void GPIOEngineController::set_speed(SpeedVal speed)
             {
                 new_pwm_duration = _pwm_period;
             }
-            _pwm_thread->set_pwm_duration(static_cast<unsigned int>(new_pwm_duration));
+
+            if (_pwm_thread != nullptr)
+            {
+                _pwm_thread->set_pwm_duration(static_cast<unsigned int>(new_pwm_duration));
+            }
+            else
+            {
+                sysfs_write(_syspwm_path + "/duty_cycle", std::to_string(new_pwm_duration));
+            }
             break;
         }
 
@@ -136,7 +161,16 @@ void GPIOEngineController::set_speed(SpeedVal speed)
         case GPIOReverseMode::NO_REVERSE:
         {
             int_speed = std::abs(int_speed);
-            _pwm_thread->set_pwm_duration((_pwm_period / 10) * int_speed);
+            int duty_cycle = (_pwm_period / 10) * int_speed * 1000;
+            if (_pwm_thread != nullptr)
+            {
+                _pwm_thread->set_pwm_duration(static_cast<unsigned int>(duty_cycle));
+            }
+            else
+            {
+                sysfs_write(_syspwm_path + "/duty_cycle", std::to_string(duty_cycle));
+            }
+
             break;
         }
     }
@@ -150,12 +184,59 @@ SpeedVal GPIOEngineController::get_speed()
 
 void GPIOEngineController::start()
 {
-    _pwm_thread->start();
+    if (_pwm_thread != nullptr)
+    {
+        // SW PWM mode
+        _pwm_thread->start();
+    }
+    else
+    {
+        // HW PWM mode, set PWM period and 0 duty cycle
+        // Linux sysfs PWM API uses nanoseconds
+        sysfs_write(_syspwm_path + "/period", std::to_string(_pwm_period * 1000));
+        sysfs_write(_syspwm_path + "/duty_cycle", std::string("0"));
+        // enable HW PWM
+        sysfs_write(_syspwm_path + "/enable", std::string("1"));
+    }
 }
 
 void GPIOEngineController::stop()
 {
-    _pwm_thread->stop();
+    if (_pwm_thread != nullptr)
+    {
+        _pwm_thread->stop();
+    }
+    else
+    {
+        // disable HW PWM
+        sysfs_write(_syspwm_path + "/enable", std::string("0"));
+    }
+}
+
+void GPIOEngineController::sysfs_write(const std::string &path, const std::string &value)
+{
+    _log->write(LogLevel::DEBUG, "GPIOEngineController::sysfs_write(), path=%s, value=%s\n",
+            path.c_str(), value.c_str());
+
+    int fd = open(path.c_str(), O_WRONLY);
+
+    if (fd == -1)
+    {
+        _log->write(LogLevel::ERROR,
+                "GPIOEngineController failed to open file %s, errno=%d\n",
+                path.c_str(), errno);
+        return;
+    }
+
+    ssize_t written = write(fd, reinterpret_cast<const void*>(value.c_str()), value.size());
+    if (written != value.size())
+    {
+        _log->write(LogLevel::ERROR,
+                "GPIOEngineController write to %s, expected to write %d bytes, wrote %d instead, errno=%d\n",
+                path.c_str(), value.size(), written, errno);
+    }
+
+    close(fd);
 }
 
 } // namespace shipcontrol

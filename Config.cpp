@@ -421,25 +421,21 @@ void Config::parse(const std::string &filename)
             {
                 gpio_engine_config.chip_path = gpio_engine["chip_path"].get<std::string>();
             }
-            else
+            if (gpio_engine.find("syspwm_path") != gpio_engine.end())
             {
-                _is_ok = false;
+                gpio_engine_config.syspwm_path = gpio_engine["syspwm_path"].get<std::string>();
+            }
+            if (gpio_engine.find("syspwm_num") != gpio_engine.end())
+            {
+                gpio_engine_config.syspwm_num = gpio_engine["syspwm_num"].get<int>();
             }
             if (gpio_engine.find("engine_line") != gpio_engine.end())
             {
                 gpio_engine_config.engine_line = gpio_engine["engine_line"].get<int>();
             }
-            else
-            {
-                _is_ok = false;
-            }
             if (gpio_engine.find("dir_line") != gpio_engine.end())
             {
                 gpio_engine_config.dir_line = gpio_engine["dir_line"].get<int>();
-            }
-            else
-            {
-                gpio_engine_config.dir_line = 0;
             }
             if (gpio_engine.find("pwm_period") != gpio_engine.end())
             {
