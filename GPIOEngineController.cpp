@@ -136,7 +136,7 @@ void GPIOEngineController::set_speed(SpeedVal speed)
             }
             else
             {
-                sysfs_write(_syspwm_path + "/duty_cycle", std::to_string(new_pwm_duration));
+                sysfs_write(_syspwm_path + "/duty_cycle", std::to_string(new_pwm_duration * 1000));
             }
             break;
         }
@@ -147,13 +147,13 @@ void GPIOEngineController::set_speed(SpeedVal speed)
             {
                 _dir_line.set_value(1);
                 _log->write(LogLevel::DEBUG,
-                        "GPIOEngineController, set direction line to 1");
+                        "GPIOEngineController, set direction line to 1\n");
             }
             else
             {
                 _dir_line.set_value(0);
                 _log->write(LogLevel::DEBUG,
-                        "GPIOEngineController, set direction line to 0");
+                        "GPIOEngineController, set direction line to 0\n");
             }
             // fall through is intentional
         }
@@ -161,14 +161,14 @@ void GPIOEngineController::set_speed(SpeedVal speed)
         case GPIOReverseMode::NO_REVERSE:
         {
             int_speed = std::abs(int_speed);
-            int duty_cycle = (_pwm_period / 10) * int_speed * 1000;
+            int duty_cycle = (_pwm_period / 10) * int_speed;
             if (_pwm_thread != nullptr)
             {
                 _pwm_thread->set_pwm_duration(static_cast<unsigned int>(duty_cycle));
             }
             else
             {
-                sysfs_write(_syspwm_path + "/duty_cycle", std::to_string(duty_cycle));
+                sysfs_write(_syspwm_path + "/duty_cycle", std::to_string(duty_cycle * 1000));
             }
 
             break;
