@@ -18,19 +18,37 @@
  *
  */
 
-#include "shipcontrol.hpp"
+#ifndef GPIO_PWM_THREAD_HPP
+#define GPIO_PWM_THREAD_HPP
 
-static shipcontrol::ShipControl *theControl;
+#include <string>
 
-int main(int argc, char **argv)
+#include "Log.hpp"
+#include "SingleThread.hpp"
+
+namespace shipcontrol
 {
-    theControl = new shipcontrol::ShipControl();
-    int ret = theControl->run(argc, argv);
-    delete theControl;
-    return ret;
-}
 
-void signal_handler(int sig)
+class GPIOPWMThread : public SingleThread
 {
-    theControl->interrupt();
-}
+public:
+    GPIOPWMThread(const std::string &chip,
+                  unsigned int engine_line,
+                  unsigned int pwm_period);
+    virtual ~GPIOPWMThread();
+
+    virtual void run();
+
+    void set_pwm_duration(unsigned int pwm_duration);
+
+protected:
+    const std::string _chip_path;
+    const unsigned int _engine_line;
+    const unsigned int _pwm_period;
+    unsigned int _pwm_duration;
+    Log *_log;
+};
+
+} // namespace shipcontrol
+
+#endif // GPIO_PWM_THREAD_HPP

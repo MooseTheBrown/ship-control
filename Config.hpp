@@ -25,6 +25,7 @@
 #include "MaestroConfig.hpp"
 #include "IPCConfig.hpp"
 #include "Log.hpp"
+#include "GPIOEngineConfig.hpp"
 #include <string>
 #include <vector>
 #include <unordered_map>
@@ -53,6 +54,8 @@ public:
     virtual int get_direction_low() { return _dir_low; }
     // IPCConfig
     virtual std::string get_unix_socket_name() { return _unix_socket; }
+    // GPIO configuration
+    std::vector<GPIOEngineConfig> get_gpio_engine_configs() { return _gpio_engine_configs; }
     // general configuration
     std::vector<LogBackendType> get_log_backends() { return _logBackends; }
     LogLevel get_log_level() { return _logLevel; }
@@ -73,6 +76,7 @@ protected:
     key_map _keymap;
     rel_map _relmap;
     std::string _unix_socket;
+    std::vector<GPIOEngineConfig> _gpio_engine_configs;
     std::vector<LogBackendType> _logBackends;
     LogLevel _logLevel;
 

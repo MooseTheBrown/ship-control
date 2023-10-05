@@ -34,11 +34,14 @@ class MaestroController : public ServoController
 {
 public:
     MaestroController(MaestroConfig &config);
-    ~MaestroController();
+    virtual ~MaestroController();
     SpeedVal get_speed();
     void set_speed(SpeedVal speed);
     SteeringVal get_steering();
     void set_steering(SteeringVal steering);
+
+    virtual void start() {}
+    virtual void stop() {}
 
 protected:
     MaestroConfig &_config;

@@ -18,7 +18,6 @@
  *
  */
 
-#include "shipcontrol.hpp"
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
@@ -26,8 +25,16 @@
 #include <signal.h>
 #include <unistd.h>
 #include <cstring>
+#include <iostream>
+
+#include <boost/program_options.hpp>
+
+#include "shipcontrol.hpp"
+#include "GPIOEngineController.hpp"
 
 extern void signal_handler(int sig);
+
+namespace po = boost::program_options;
 
 namespace shipcontrol
 {
@@ -35,12 +42,14 @@ namespace shipcontrol
 ShipControl::ShipControl() :
     _config(nullptr),
     _evdevReader(nullptr),
-    _controller(nullptr),
     _speed(SpeedVal::STOP),
     _steering(SteeringVal::STRAIGHT),
     _ipcHandler(nullptr),
     _unixListener(nullptr),
-    _stop(false)
+    _stop(false),
+    _mode(ShipControlMode::NORMAL),
+    _cmd_speed(""),
+    _cmd_steering("")
 {
     _log = Log::getInstance();
 }
@@ -55,10 +64,6 @@ ShipControl::~ShipControl()
     {
         delete _evdevReader;
     }
-    if (_controller != nullptr)
-    {
-        delete _controller;
-    }
     if (_ipcHandler != nullptr)
     {
         delete _ipcHandler;
@@ -67,12 +72,75 @@ ShipControl::~ShipControl()
     {
         delete _unixListener;
     }
+    for (ServoController *controller : _servo_controllers)
+    {
+        if (controller != nullptr)
+        {
+            delete controller;
+        }
+    }
     Log::release();
 }
 
-int ShipControl::run()
+int ShipControl::handle_cmd_line(int argc, char **argv)
 {
-    int ret = init();
+    try
+    {
+        po::variables_map opts;
+        po::options_description opt_descr("Available options:");
+
+        opt_descr.add_options()
+            ("help", "print help message")
+            ("speed", po::value<std::string>(), "set speed")
+            ("steering", po::value<std::string>(), "set steering");
+
+        po::store(po::parse_command_line(argc, argv, opt_descr), opts);
+        po::notify(opts);
+
+        if (opts.count("help"))
+        {
+            _mode = ShipControlMode::HELP;
+            std::cout << "Usage: " << argv[0] << " [options]\n";
+            std::cout << opt_descr << "\n";
+            return RETVAL_OK;
+        }
+
+        if (opts.count("speed"))
+        {
+            _cmd_speed = opts["speed"].as<std::string>();
+            _mode = ShipControlMode::COMMAND;
+        }
+
+        if (opts.count("steering"))
+        {
+            _cmd_steering = opts["steering"].as<std::string>();
+            _mode = ShipControlMode::COMMAND;
+        }
+
+        return RETVAL_OK;
+    }
+    catch (const std::exception &e)
+    {
+        std::cout << e.what() << "\n";
+        return RETVAL_INVALID_CMDLINE;
+    }
+}
+
+int ShipControl::run(int argc, char **argv)
+{
+    int ret = handle_cmd_line(argc, argv);
+    if (ret != RETVAL_OK)
+    {
+        return ret;
+    }
+
+    if (_mode == ShipControlMode::HELP)
+    {
+        // help message has already been printed, just quit
+        return RETVAL_OK;
+    }
+
+    ret = init();
 
     if (ret != RETVAL_OK)
     {
@@ -82,38 +150,59 @@ int ShipControl::run()
     _evdevReader->start();
     _unixListener->start();
 
-    // event handling loop
-    while (true)
+    for (ServoController *controller : _servo_controllers)
     {
-        if (_stop)
-        {
-            break;
-        }
+        controller->start();
+    }
 
-        InputEvent evt = _inputQueue.pop_blocking();
-        switch (evt.type)
+    if (_mode == ShipControlMode::NORMAL)
+    {
+        // event handling loop
+        while (true)
         {
-        case InputEventType::TURN_RIGHT:
-            turn_right();
-            break;
-        case InputEventType::TURN_LEFT:
-            turn_left();
-            break;
-        case InputEventType::SPEED_UP:
-            speed_up();
-            break;
-        case InputEventType::SPEED_DOWN:
-            speed_down();
-            break;
-        case InputEventType::SET_SPEED:
-            set_speed(evt.data);
-            break;
-        case InputEventType::SET_STEERING:
-            set_steering(evt.data);
-            break;
-        default:
-            break;
+            if (_stop)
+            {
+                break;
+            }
+
+            InputEvent evt = _inputQueue.pop_blocking();
+            switch (evt.type)
+            {
+            case InputEventType::TURN_RIGHT:
+                turn_right();
+                break;
+            case InputEventType::TURN_LEFT:
+                turn_left();
+                break;
+            case InputEventType::SPEED_UP:
+                speed_up();
+                break;
+            case InputEventType::SPEED_DOWN:
+                speed_down();
+                break;
+            case InputEventType::SET_SPEED:
+                set_speed(evt.data);
+                break;
+            case InputEventType::SET_STEERING:
+                set_steering(evt.data);
+                break;
+            default:
+                break;
+            }
         }
+    }
+    else
+    {
+        // command mode
+        set_speed(_cmd_speed);
+        set_steering(_cmd_steering);
+        std::cout << "Press any key to exit\n";
+        std::cin.get();
+    }
+
+    for (ServoController *controller : _servo_controllers)
+    {
+        controller->stop();
     }
 
     _evdevReader->stop();
@@ -153,9 +242,16 @@ int ShipControl::init()
     _evdevReader = new EvdevReader(*_config, _psmoveinput_dev, _inputQueue);
 
     // initialize Maestro controller
-    _controller = new MaestroController(*_config);
-    _speed = _controller->get_speed();
-    _steering = _controller->get_steering();
+    MaestroController *maestro_controller = new MaestroController(*_config);
+    _servo_controllers.push_back(maestro_controller);
+
+    // initialize GPIO engine controllers
+    std::vector<GPIOEngineConfig> gpio_engine_configs = _config->get_gpio_engine_configs();
+    for (GPIOEngineConfig gpio_engine_config : gpio_engine_configs)
+    {
+        GPIOEngineController *gpio_engine_controller = new GPIOEngineController(gpio_engine_config);
+        _servo_controllers.push_back(gpio_engine_controller);
+    }
 
     // initialize Unix socket listener
     _ipcHandler = new IPCRequestHandler(_inputQueue, *this);
@@ -203,10 +299,9 @@ void ShipControl::find_input_device(const char *input_name, std::string &result)
 
 void ShipControl::turn_right()
 {
-    SteeringVal cur_steering = _controller->get_steering();
-    SteeringVal new_steering = SteeringVal::RIGHT50;
+    SteeringVal new_steering;
 
-    switch (cur_steering)
+    switch (_steering)
     {
     case SteeringVal::STRAIGHT:
         new_steering = SteeringVal::RIGHT10;
@@ -272,16 +367,18 @@ void ShipControl::turn_right()
         return;
     }
 
-    _controller->set_steering(new_steering);
-    _steering = _controller->get_steering();
+    for (ServoController *controller : _servo_controllers)
+    {
+        controller->set_steering(new_steering);
+    }
+    _steering = new_steering;
 }
 
 void ShipControl::turn_left()
 {
-    SteeringVal cur_steering = _controller->get_steering();
     SteeringVal new_steering;
 
-    switch (cur_steering)
+    switch (_steering)
     {
     case SteeringVal::STRAIGHT:
         new_steering = SteeringVal::LEFT10;
@@ -347,16 +444,18 @@ void ShipControl::turn_left()
         return;
     }
 
-    _controller->set_steering(new_steering);
-    _steering = _controller->get_steering();
+    for (ServoController *controller : _servo_controllers)
+    {
+        controller->set_steering(new_steering);
+    }
+    _steering = new_steering;
 }
 
 void ShipControl::speed_up()
 {
-    SpeedVal cur_speed = _controller->get_speed();
     SpeedVal new_speed;
 
-    switch (cur_speed)
+    switch (_speed)
     {
     case SpeedVal::STOP:
         new_speed = SpeedVal::FWD10;
@@ -422,16 +521,18 @@ void ShipControl::speed_up()
         return;
     }
 
-    _controller->set_speed(new_speed);
-    _speed = _controller->get_speed();
+    for (ServoController *controller : _servo_controllers)
+    {
+        controller->set_speed(new_speed);
+    }
+    _speed = new_speed;
 }
 
 void ShipControl::speed_down()
 {
-    SpeedVal cur_speed = _controller->get_speed();
     SpeedVal new_speed;
 
-    switch (cur_speed)
+    switch (_speed)
     {
     case SpeedVal::STOP:
         new_speed = SpeedVal::REV10;
@@ -497,23 +598,32 @@ void ShipControl::speed_down()
         return;
     }
 
-    _controller->set_speed(new_speed);
-    _speed = _controller->get_speed();
+    for (ServoController *controller : _servo_controllers)
+    {
+        controller->set_speed(new_speed);
+    }
+    _speed = new_speed;
 }
 
 
 void ShipControl::set_speed(const std::string &speed_str)
 {
     SpeedVal new_speed = ServoController::str_to_speed(speed_str);
-    _controller->set_speed(new_speed);
-    _speed = _controller->get_speed();
+    for (ServoController *controller : _servo_controllers)
+    {
+        controller->set_speed(new_speed);
+    }
+    _speed = new_speed;
 }
 
 void ShipControl::set_steering(const std::string &steering_str)
 {
     SteeringVal new_steering = ServoController::str_to_steering(steering_str);
-    _controller->set_steering(new_steering);
-    _steering = _controller->get_steering();
+    for (ServoController *controller : _servo_controllers)
+    {
+        controller->set_steering(new_steering);
+    }
+    _steering = new_steering;
 }
 
 void ShipControl::setup_signals()
