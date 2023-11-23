@@ -1,0 +1,95 @@
+@startuml
+!pragma teoz true
+
+actor user
+participant "ship-control-android" as mobile
+
+box "MQTT broker" #LightGreen
+    queue "Announce topic" as announce
+    queue "Ship request topic" as rqTopic
+    queue "Ship response topic" as respTopic
+end box
+
+box "Ship" #LightBlue
+participant "ship-net-bridge" as bridge
+
+box "ship-control" #LightYellow
+    participant "unix listener" as unixListener
+    queue "input queue" as inputQueue
+    participant shipcontrol
+    participant "GPIO engine controller" as engine
+    participant "steering servo controller" as steering
+end box
+
+end box
+
+note over announce: Common topic for all ships
+/ note over rqTopic, respTopic: Individual topic for each ship
+
+== Initialization ==
+activate bridge
+bridge -> rqTopic++--: Subscribe
+deactivate rqTopic
+
+activate mobile
+mobile -> announce++--: Subscribe
+deactivate announce
+
+== Ship discovery ==
+
+activate bridge
+bridge -> announce++--: Publish ship ID
+announce -> mobile++--: Publish ship ID
+mobile -> mobile--: Display ship list
+
+== Ship control - query ==
+
+user -> mobile++: Select ship
+mobile -> respTopic++: Subscribe
+deactivate respTopic
+|||
+loop
+mobile -> rqTopic++: Query ship data
+rqTopic -> bridge++--: Publish query
+bridge -> unixListener++--: Pass query
+unixListener -> shipcontrol++: Pass query
+shipcontrol -> engine++: Get current speed
+return current speed
+shipcontrol -> steering++: Get current steering
+return current steering
+shipcontrol -> unixListener--: Return ship data
+unixListener -> bridge++--: Return ship data
+bridge -> respTopic++--: Publish ship data
+respTopic -> mobile--: Publish ship data
+mobile -> mobile--: Display ship data
+end
+
+== Ship control - command ==
+user -> mobile++: Change speed or steering
+mobile -> rqTopic++: Publish command
+rqTopic -> bridge++--: Publish command
+bridge -> unixListener++: Pass command
+unixListener -> unixListener: Validate command
+alt Validation ok
+    unixListener -> bridge: OK response
+else Validation failed
+    unixListener -> bridge: Failure response
+end
+bridge -> respTopic++--: Pass response
+respTopic -> mobile--: Pass response
+deactivate mobile
+
+unixListener -> inputQueue++--: Queue command
+activate shipcontrol
+shipcontrol -> inputQueue: Get command
+deactivate inputQueue
+alt Speed
+    shipcontrol -> engine++: Set speed
+    deactivate engine
+else Steering
+    shipcontrol -> steering++: Set steering
+    deactivate steering
+end
+deactivate shipcontrol
+
+@enduml
