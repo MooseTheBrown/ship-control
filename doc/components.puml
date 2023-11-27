@@ -1,0 +1,38 @@
+@startuml
+node "Android device" {
+    [ship-control-android] as mobile
+}
+cloud "Internet" {
+    [MQTT broker] as broker
+}
+
+node "Custom Buildroot Linux" {
+    [ship-net-bridge] as bridge
+    frame "ship-control" {
+        () "Unix socket" as usock
+        [unix handler] - usock
+        bridge --> usock
+        [unix handler] --> [command queue]: command
+        [command queue] --> [main controller]: command
+        () "Query data provider" as provider
+        [main controller] - provider
+        [main controller] --> [Maestro module]
+        [main controller] --> [PWM module]
+        [unix handler] --> provider: query
+    }
+    frame "ship hardware" {
+        () "GPIO"
+        [H-bridge] - GPIO
+        [H-bridge] --> [engine]
+        () "USB"
+        [Pololu Maestro controller] - "USB"
+        [Pololu Maestro controller] --> [steering servo]
+    }
+}
+
+mobile --> broker
+broker --> bridge
+[PWM module] --> "GPIO": H/W- or S/W-generated PWM
+[Maestro module] --> "USB": Pololu protocol commands
+
+@enduml
