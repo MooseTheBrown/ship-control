@@ -22,8 +22,8 @@ node "Custom Buildroot Linux" {
     }
     frame "ship hardware" {
         () "GPIO"
-        [H-bridge] - GPIO
-        [H-bridge] --> [engine]
+        [ESC] - GPIO
+        [ESC] --> [engine]
         () "USB"
         [Pololu Maestro controller] - "USB"
         [Pololu Maestro controller] --> [steering servo]
