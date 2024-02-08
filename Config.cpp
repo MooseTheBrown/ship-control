@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016-2023 Mikhail Sapozhnikov
+ * Copyright (C) 2016-2024 Mikhail Sapozhnikov
  *
  * This file is part of ship-control.
  *
@@ -444,6 +444,14 @@ void Config::parse(const std::string &filename)
             else
             {
                 _is_ok = false;
+            }
+            if (gpio_engine.find("min_duty_cycle") != gpio_engine.end())
+            {
+                gpio_engine_config.min_duty_cycle = gpio_engine["min_duty_cycle"].get<int>();
+            }
+            if (gpio_engine.find("max_duty_cycle") != gpio_engine.end())
+            {
+                gpio_engine_config.max_duty_cycle = gpio_engine["max_duty_cycle"].get<int>();
             }
             if (gpio_engine.find("rev_mode") != gpio_engine.end())
             {

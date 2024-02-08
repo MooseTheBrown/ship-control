@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016 - 2023 Mikhail Sapozhnikov
+ * Copyright (C) 2016 - 2024 Mikhail Sapozhnikov
  *
  * This file is part of ship-control.
  *
@@ -58,6 +58,9 @@ protected:
     unsigned int _dir_line_num;
     // engine PWM period - microseconds between consecutive high level signals
     unsigned int _pwm_period;
+    // min and max duty cycle in % of PWM period
+    unsigned int _min_duty_cycle;
+    unsigned int _max_duty_cycle;
     GPIOReverseMode _rev_mode;
     // current engine speed
     SpeedVal _cur_speed;

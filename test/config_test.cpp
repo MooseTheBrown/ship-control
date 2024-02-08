@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016 - 2023 Mikhail Sapozhnikov
+ * Copyright (C) 2016 - 2024 Mikhail Sapozhnikov
  *
  * This file is part of ship-control.
  *
@@ -109,6 +109,8 @@ TEST(Config, ConfigTest)
     ASSERT_EQ(0, gpio_engine_configs[3].syspwm_num);
     ASSERT_EQ(11, gpio_engine_configs[3].dir_line);
     ASSERT_EQ(10, gpio_engine_configs[3].pwm_period);
+    ASSERT_EQ(5, gpio_engine_configs[3].min_duty_cycle);
+    ASSERT_EQ(65, gpio_engine_configs[3].max_duty_cycle);
     ASSERT_EQ(sc::GPIOReverseMode::DEDICATED_LINE, gpio_engine_configs[3].reverse_mode);
 
     std::vector<sc::LogBackendType> log_backends = config.get_log_backends();

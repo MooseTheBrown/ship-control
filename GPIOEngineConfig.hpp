@@ -1,4 +1,4 @@
-/* * Copyright (C) 2016 - 2023 Mikhail Sapozhnikov
+/* * Copyright (C) 2016 - 2024 Mikhail Sapozhnikov
  *
  * This file is part of ship-control.
  *
@@ -45,7 +45,11 @@ struct GPIOEngineConfig
     // full path to HW PWM, e.g. /sys/class/pwm/pwmchip0/pwm0
     unsigned int syspwm_num = 0;
     unsigned int dir_line = 0;
+    // pwm period in microseonds
     unsigned int pwm_period = 0;
+    // min and max duty cycle are in % of pwm_period
+    unsigned int min_duty_cycle = 10;
+    unsigned int max_duty_cycle = 20;
     GPIOReverseMode reverse_mode = GPIOReverseMode::NO_REVERSE;
 };
 

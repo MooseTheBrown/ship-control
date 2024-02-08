@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016 - 2023 Mikhail Sapozhnikov
+ * Copyright (C) 2016 - 2024 Mikhail Sapozhnikov
  *
  * This file is part of ship-control.
  *
@@ -39,6 +39,8 @@ GPIOEngineController::GPIOEngineController(const GPIOEngineConfig &config) :
     _engine_line_num = config.engine_line;
     _dir_line_num = config.dir_line;
     _pwm_period = config.pwm_period;
+    _min_duty_cycle = config.min_duty_cycle;
+    _max_duty_cycle = config.max_duty_cycle;
     _rev_mode = config.reverse_mode;
 
     _log = Log::getInstance();
@@ -118,25 +120,27 @@ void GPIOEngineController::set_speed(SpeedVal speed)
     {
         case GPIOReverseMode::SAME_LINE:
         {
-            unsigned int neutral = _pwm_period / 2;
-            unsigned int step = (_pwm_period - neutral) / 10;
-            int new_pwm_duration = neutral + step * int_speed;
-            if (new_pwm_duration < 0)
+            unsigned int neutral = (_max_duty_cycle - _min_duty_cycle) / 2;
+            unsigned int step = (_max_duty_cycle - neutral) / 10;
+            int duty_cycle = neutral + step * int_speed;
+            if (duty_cycle < _min_duty_cycle)
             {
-                new_pwm_duration = 0;
+                duty_cycle = _min_duty_cycle;
             }
-            else if (new_pwm_duration > _pwm_period)
+            else if (duty_cycle > _max_duty_cycle)
             {
-                new_pwm_duration = _pwm_period;
+                duty_cycle = _max_duty_cycle;
             }
+
+            unsigned int pwm_duration = duty_cycle * _pwm_period / 100;
 
             if (_pwm_thread != nullptr)
             {
-                _pwm_thread->set_pwm_duration(static_cast<unsigned int>(new_pwm_duration));
+                _pwm_thread->set_pwm_duration(static_cast<unsigned int>(pwm_duration));
             }
             else
             {
-                sysfs_write(_syspwm_path + "/duty_cycle", std::to_string(new_pwm_duration * 1000));
+                sysfs_write(_syspwm_path + "/duty_cycle", std::to_string(pwm_duration * 1000));
             }
             break;
         }
@@ -161,14 +165,15 @@ void GPIOEngineController::set_speed(SpeedVal speed)
         case GPIOReverseMode::NO_REVERSE:
         {
             int_speed = std::abs(int_speed);
-            int duty_cycle = (_pwm_period / 10) * int_speed;
+            unsigned int duty_cycle = _min_duty_cycle + (int_speed * (_max_duty_cycle - _min_duty_cycle) / 10 );
+            unsigned int pwm_duration = duty_cycle * _pwm_period / 100;
             if (_pwm_thread != nullptr)
             {
-                _pwm_thread->set_pwm_duration(static_cast<unsigned int>(duty_cycle));
+                _pwm_thread->set_pwm_duration(static_cast<unsigned int>(pwm_duration));
             }
             else
             {
-                sysfs_write(_syspwm_path + "/duty_cycle", std::to_string(duty_cycle * 1000));
+                sysfs_write(_syspwm_path + "/duty_cycle", std::to_string(pwm_duration * 1000));
             }
 
             break;
@@ -191,10 +196,11 @@ void GPIOEngineController::start()
     }
     else
     {
-        // HW PWM mode, set PWM period and 0 duty cycle
+        // HW PWM mode, set PWM period and duty cycle
         // Linux sysfs PWM API uses nanoseconds
         sysfs_write(_syspwm_path + "/period", std::to_string(_pwm_period * 1000));
-        sysfs_write(_syspwm_path + "/duty_cycle", std::string("0"));
+        unsigned int pwm_duration = _min_duty_cycle * _pwm_period / 100;
+        sysfs_write(_syspwm_path + "/duty_cycle", std::to_string(pwm_duration * 1000));
         // enable HW PWM
         sysfs_write(_syspwm_path + "/enable", std::string("1"));
     }

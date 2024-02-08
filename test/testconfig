@@ -50,6 +50,8 @@
         "syspwm_num": 0,
         "dir_line": 11,
         "pwm_period": 10,
+        "min_duty_cycle": 5,
+        "max_duty_cycle": 65,
         "rev_mode": "dedicated_line"
     }
     ],
