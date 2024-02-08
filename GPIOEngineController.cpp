@@ -119,7 +119,7 @@ void GPIOEngineController::set_speed(SpeedVal speed)
         case GPIOReverseMode::SAME_LINE:
         {
             unsigned int neutral = _pwm_period / 2;
-            unsigned int step = _pwm_period - neutral / 10;
+            unsigned int step = (_pwm_period - neutral) / 10;
             int new_pwm_duration = neutral + step * int_speed;
             if (new_pwm_duration < 0)
             {
