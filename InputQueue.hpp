@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016 - 2023 Mikhail Sapozhnikov
+ * Copyright (C) 2016 - 2024 Mikhail Sapozhnikov
  *
  * This file is part of ship-control.
  *
@@ -24,6 +24,7 @@
 #include <queue>
 #include <mutex>
 #include <condition_variable>
+#include <string>
 
 namespace shipcontrol
 {

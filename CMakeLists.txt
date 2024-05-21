@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2016 - 2023 Mikhail Sapozhnikov
+# Copyright (C) 2016 - 2024 Mikhail Sapozhnikov
 #
 # This file is part of ship-control.
 #
@@ -23,7 +23,7 @@ project (ship-control)
 
 option (BUILD_TESTS "Build tests" OFF)
 
-set (COMMON_CXX_FLAGS "-std=c++11 -pthread")
+set (COMMON_CXX_FLAGS "-std=c++17 -pthread")
 set (TEST_CXX_FLAGS "")
 if (BUILD_TESTS)
     set (TEST_CXX_FLAGS -DTESTCONFIG_FILE=\\\"${ship-control_SOURCE_DIR}/test/testconfig\\\")
