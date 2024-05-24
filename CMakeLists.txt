@@ -52,6 +52,8 @@ set (SHIPCONTROL_SRC Log.cpp
                      ServoController.cpp
                      GPIOEngineController.cpp
                      GPIOPWMThread.cpp
+                     GPIOSteeringController.cpp
+                     GPIOUtil.cpp
                      shipcontrol.cpp)
 
 find_library (GPIOD_LIB NAMES gpiodcxx)

@@ -26,6 +26,7 @@
 #include <errno.h>
 
 #include "GPIOEngineController.hpp"
+#include "GPIOUtil.hpp"
 
 namespace shipcontrol
 {
@@ -54,7 +55,7 @@ GPIOEngineController::GPIOEngineController(const GPIOEngineConfig &config) :
         // HW PWM mode
         _pwm_thread = nullptr;
         _syspwm_path = config.syspwm_path + "/pwm" + std::to_string(config.syspwm_num);
-        sysfs_write(config.syspwm_path + "/export", std::to_string(config.syspwm_num));
+        GPIOUtil::sysfs_write(config.syspwm_path + "/export", std::to_string(config.syspwm_num), _log);
     }
     else
     {
@@ -140,7 +141,7 @@ void GPIOEngineController::set_speed(SpeedVal speed)
             }
             else
             {
-                sysfs_write(_syspwm_path + "/duty_cycle", std::to_string(pwm_duration * 1000));
+                GPIOUtil::sysfs_write(_syspwm_path + "/duty_cycle", std::to_string(pwm_duration * 1000), _log);
             }
             break;
         }
@@ -173,7 +174,7 @@ void GPIOEngineController::set_speed(SpeedVal speed)
             }
             else
             {
-                sysfs_write(_syspwm_path + "/duty_cycle", std::to_string(pwm_duration * 1000));
+                GPIOUtil::sysfs_write(_syspwm_path + "/duty_cycle", std::to_string(pwm_duration * 1000), _log);
             }
 
             break;
@@ -198,11 +199,11 @@ void GPIOEngineController::start()
     {
         // HW PWM mode, set PWM period and duty cycle
         // Linux sysfs PWM API uses nanoseconds
-        sysfs_write(_syspwm_path + "/period", std::to_string(_pwm_period * 1000));
+        GPIOUtil::sysfs_write(_syspwm_path + "/period", std::to_string(_pwm_period * 1000), _log);
         unsigned int pwm_duration = _min_duty_cycle * _pwm_period / 100;
-        sysfs_write(_syspwm_path + "/duty_cycle", std::to_string(pwm_duration * 1000));
+        GPIOUtil::sysfs_write(_syspwm_path + "/duty_cycle", std::to_string(pwm_duration * 1000), _log);
         // enable HW PWM
-        sysfs_write(_syspwm_path + "/enable", std::string("1"));
+        GPIOUtil::sysfs_write(_syspwm_path + "/enable", std::string("1"), _log);
     }
 }
 
@@ -215,34 +216,9 @@ void GPIOEngineController::stop()
     else
     {
         // disable HW PWM
-        sysfs_write(_syspwm_path + "/enable", std::string("0"));
+        GPIOUtil::sysfs_write(_syspwm_path + "/enable", std::string("0"), _log);
     }
 }
 
-void GPIOEngineController::sysfs_write(const std::string &path, const std::string &value)
-{
-    _log->write(LogLevel::DEBUG, "GPIOEngineController::sysfs_write(), path=%s, value=%s\n",
-            path.c_str(), value.c_str());
-
-    int fd = open(path.c_str(), O_WRONLY);
-
-    if (fd == -1)
-    {
-        _log->write(LogLevel::ERROR,
-                "GPIOEngineController failed to open file %s, errno=%d\n",
-                path.c_str(), errno);
-        return;
-    }
-
-    ssize_t written = write(fd, reinterpret_cast<const void*>(value.c_str()), value.size());
-    if (written != value.size())
-    {
-        _log->write(LogLevel::ERROR,
-                "GPIOEngineController write to %s, expected to write %d bytes, wrote %d instead, errno=%d\n",
-                path.c_str(), value.size(), written, errno);
-    }
-
-    close(fd);
-}
 
 } // namespace shipcontrol
