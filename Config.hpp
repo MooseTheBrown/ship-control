@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016 - 2023 Mikhail Sapozhnikov
+ * Copyright (C) 2016 - 2024 Mikhail Sapozhnikov
  *
  * This file is part of ship-control.
  *
@@ -26,6 +26,7 @@
 #include "IPCConfig.hpp"
 #include "Log.hpp"
 #include "GPIOEngineConfig.hpp"
+#include "GPIOSteeringConfig.hpp"
 #include <string>
 #include <vector>
 #include <unordered_map>
@@ -56,6 +57,7 @@ public:
     virtual std::string get_unix_socket_name() { return _unix_socket; }
     // GPIO configuration
     std::vector<GPIOEngineConfig> get_gpio_engine_configs() { return _gpio_engine_configs; }
+    std::vector<GPIOSteeringConfig> get_gpio_steering_configs() { return _gpio_steering_configs; }
     // general configuration
     std::vector<LogBackendType> get_log_backends() { return _logBackends; }
     LogLevel get_log_level() { return _logLevel; }
@@ -77,6 +79,7 @@ protected:
     rel_map _relmap;
     std::string _unix_socket;
     std::vector<GPIOEngineConfig> _gpio_engine_configs;
+    std::vector<GPIOSteeringConfig> _gpio_steering_configs;
     std::vector<LogBackendType> _logBackends;
     LogLevel _logLevel;
 

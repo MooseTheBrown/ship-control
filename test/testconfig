@@ -55,6 +55,22 @@
         "rev_mode": "dedicated_line"
     }
     ],
+    "gpio_steering": [
+    {
+        "chip_path": "/dev/gpiochip0",
+        "steering_line": 25,
+        "pwm_period": 7000,
+        "min_duty_cycle": 10,
+        "max_duty_cycle": 20
+    },
+    {
+        "syspwm_path": "/sys/class/pwm/pwmchip0",
+        "syspwm_num": 1,
+        "pwm_period": 16600,
+        "min_duty_cycle": 6,
+        "max_duty_cycle": 12
+    }
+    ],
     "keymap": {
         "KEY_1": "SPEED_UP",
         "KEY_2": "SPEED_DOWN"

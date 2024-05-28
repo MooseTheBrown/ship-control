@@ -113,6 +113,20 @@ TEST(Config, ConfigTest)
     ASSERT_EQ(65, gpio_engine_configs[3].max_duty_cycle);
     ASSERT_EQ(sc::GPIOReverseMode::DEDICATED_LINE, gpio_engine_configs[3].reverse_mode);
 
+    std::vector<sc::GPIOSteeringConfig> gpio_steering_configs = config.get_gpio_steering_configs();
+    ASSERT_EQ(2, gpio_steering_configs.size());
+    ASSERT_STREQ("/dev/gpiochip0", gpio_steering_configs[0].chip_path.c_str());
+    ASSERT_EQ(25, gpio_steering_configs[0].steering_line);
+    ASSERT_EQ(7000, gpio_steering_configs[0].pwm_period);
+    ASSERT_EQ(10, gpio_steering_configs[0].min_duty_cycle);
+    ASSERT_EQ(20, gpio_steering_configs[0].max_duty_cycle);
+
+    ASSERT_STREQ("/sys/class/pwm/pwmchip0", gpio_steering_configs[1].syspwm_path.c_str());
+    ASSERT_EQ(1, gpio_steering_configs[1].syspwm_num);
+    ASSERT_EQ(16600, gpio_steering_configs[1].pwm_period);
+    ASSERT_EQ(6, gpio_steering_configs[1].min_duty_cycle);
+    ASSERT_EQ(12, gpio_steering_configs[1].max_duty_cycle);
+
     std::vector<sc::LogBackendType> log_backends = config.get_log_backends();
     ASSERT_EQ(2, log_backends.size());
     ASSERT_EQ(sc::LogBackendType::CONSOLE, log_backends[0]);

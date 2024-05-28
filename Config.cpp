@@ -480,6 +480,46 @@ void Config::parse(const std::string &filename)
             _gpio_engine_configs.push_back(gpio_engine_config);
         }
     }
+
+    if (j.find("gpio_steering") != j.end())
+    {
+        auto gpio_steering_array = j["gpio_steering"];
+        for (auto gpio_steering : gpio_steering_array)
+        {
+            GPIOSteeringConfig gpio_steering_config;
+
+            if (gpio_steering.find("chip_path") != gpio_steering.end())
+            {
+                gpio_steering_config.chip_path = gpio_steering["chip_path"].get<std::string>();
+            }
+            if (gpio_steering.find("steering_line") != gpio_steering.end())
+            {
+                gpio_steering_config.steering_line = gpio_steering["steering_line"].get<int>();
+            }
+            if (gpio_steering.find("syspwm_path") != gpio_steering.end())
+            {
+                gpio_steering_config.syspwm_path = gpio_steering["syspwm_path"].get<std::string>();
+            }
+            if (gpio_steering.find("syspwm_num") != gpio_steering.end())
+            {
+                gpio_steering_config.syspwm_num = gpio_steering["syspwm_num"].get<int>();
+            }
+            if (gpio_steering.find("pwm_period") != gpio_steering.end())
+            {
+                gpio_steering_config.pwm_period = gpio_steering["pwm_period"].get<int>();
+            }
+            if (gpio_steering.find("min_duty_cycle") != gpio_steering.end())
+            {
+                gpio_steering_config.min_duty_cycle = gpio_steering["min_duty_cycle"].get<int>();
+            }
+            if (gpio_steering.find("max_duty_cycle") != gpio_steering.end())
+            {
+                gpio_steering_config.max_duty_cycle = gpio_steering["max_duty_cycle"].get<int>();
+            }
+
+            _gpio_steering_configs.push_back(gpio_steering_config);
+        }
+    }
 }
 
 } // namespace shipcontrol

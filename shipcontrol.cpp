@@ -31,6 +31,7 @@
 
 #include "shipcontrol.hpp"
 #include "GPIOEngineController.hpp"
+#include "GPIOSteeringController.hpp"
 
 extern void signal_handler(int sig);
 
@@ -251,6 +252,14 @@ int ShipControl::init()
     {
         GPIOEngineController *gpio_engine_controller = new GPIOEngineController(gpio_engine_config);
         _servo_controllers.push_back(gpio_engine_controller);
+    }
+
+    // initialize GPIO steering controllers
+    std::vector<GPIOSteeringConfig> gpio_steering_configs  =  _config->get_gpio_steering_configs();
+    for (GPIOSteeringConfig gpio_steering_config  : gpio_steering_configs)
+    {
+        GPIOSteeringController *gpio_steering_controller  = new GPIOSteeringController(gpio_steering_config);
+        _servo_controllers.push_back(gpio_steering_controller);
     }
 
     // initialize Unix socket listener
