@@ -67,7 +67,8 @@ void GPIOSteeringController::start()
         // HW PWM mode, set PWM period and duty cycle
         // Linux sysfs PWM API uses nanoseconds
         GPIOUtil::sysfs_write(_pwm_path + "/period", std::to_string(_pwm_period * 1000), _log);
-        unsigned int pwm_duration = _min_duty_cycle * _pwm_period / 100;
+        unsigned int straight = (_min_duty_cycle + _max_duty_cycle) / 2;
+        unsigned int pwm_duration = straight * _pwm_period / 100;
         GPIOUtil::sysfs_write(_pwm_path + "/duty_cycle", std::to_string(pwm_duration * 1000), _log);
         // enable HW PWM
         GPIOUtil::sysfs_write(_pwm_path + "/enable", std::string("1"), _log);
@@ -89,8 +90,9 @@ void GPIOSteeringController::stop()
 void GPIOSteeringController::set_steering(SteeringVal steering)
 {
     _cur_steering = steering;
-    int int_steering = std::abs(static_cast<int>(steering));
-    unsigned int duty_cycle = _min_duty_cycle + int_steering * (_max_duty_cycle - _min_duty_cycle) / 10;
+    int int_steering = static_cast<int>(steering);
+    unsigned int straight = (_min_duty_cycle + _max_duty_cycle) / 2;
+    unsigned int duty_cycle = straight + int_steering * (_max_duty_cycle - straight) / 10;
     unsigned int pwm_duration = duty_cycle * _pwm_period / 100;
     if (_pwm_thread != nullptr)
     {
