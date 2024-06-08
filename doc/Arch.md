@@ -18,13 +18,9 @@ Android application providing GUI for remote ship control. Uses MQTT broker to s
 Ship-side network bridge. Connects to MQTT broker and relays messages between the broker and unix socket opened by ship-control process.
 
 ### ship-control
-Manages ship hardware using Pololu Maestro controller and ESC units (one or more). Maestro controller is connected via USB, ESC units are connected using GPIO lines.
+Manages ship engines via ESC units (one or more) and ship steering servos directly. Both ESCs and servos are connected to GPIO lines of the main ship board and are managed using PWM signals. ship-control is capable of using either S/W or H/W generated PWM. H/W PWM is preferred due to much higher frequency setting precision.
 
-Maestro controller is used to control steering servos.
-
-ESCs manage engines.
-
-ship-control uses either H/W or S/W PWM signals to control ESCs or a combination of both depending on the particular RaspberryPi board model and configuration (older revisions support only 1 H/W PWM GPIO line). H/W PWM is preferred due to much higher frequency setting precision.
+Optionally Pololu Maestro controller can be used to control steering servos and engines although this is considered legacy mode. Ship-control includes corresponding module responsible for communication with the controller over USB.
 
 ship-control listens to Unix socket for external communications. Commands received from the network bridge are queued for internal processing in the order of reception. Queries are handled synchronously.
 
