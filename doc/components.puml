@@ -16,23 +16,22 @@ node "Custom Buildroot Linux" {
         [command queue] --> [main controller]: command
         () "Query data provider" as provider
         [main controller] - provider
-        [main controller] --> [Maestro module]
-        [main controller] --> [PWM module]
+        [main controller] --> [steering module]
+        [main controller] --> [engine module]
         [unix handler] --> provider: query
     }
     frame "ship hardware" {
-        () "GPIO"
-        [ESC] - GPIO
+        () "engine GPIO"
+        () "steering GPIO"
+        [ESC] - "engine GPIO"
         [ESC] --> [engine]
-        () "USB"
-        [Pololu Maestro controller] - "USB"
-        [Pololu Maestro controller] --> [steering servo]
+        [steering servo] - "steering GPIO"
     }
 }
 
 mobile --> broker
 broker --> bridge
-[PWM module] --> "GPIO": H/W- or S/W-generated PWM
-[Maestro module] --> "USB": Pololu protocol commands
+[engine module] --> "engine GPIO": H/W- or S/W-generated PWM
+[steering module] --> "steering GPIO": H/W- or S/W-generated PWM
 
 @enduml
