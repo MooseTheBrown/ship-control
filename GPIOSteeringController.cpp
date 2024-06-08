@@ -91,9 +91,13 @@ void GPIOSteeringController::set_steering(SteeringVal steering)
 {
     _cur_steering = steering;
     int int_steering = static_cast<int>(steering);
-    unsigned int straight = (_min_duty_cycle + _max_duty_cycle) / 2;
-    unsigned int duty_cycle = straight + int_steering * (_max_duty_cycle - straight) / 10;
-    unsigned int pwm_duration = duty_cycle * _pwm_period / 100;
+    // multiply duty cycle percentages by 10 to increase setting accuracy
+    unsigned int min_duty_cycle = _min_duty_cycle * 10;
+    unsigned int max_duty_cycle = _max_duty_cycle * 10;
+    unsigned int straight = (min_duty_cycle + max_duty_cycle) / 2;
+    unsigned int duty_cycle = straight + int_steering * (max_duty_cycle - straight) / 10;
+    // divide by 1000 instead of 100 because we multiplied percentages by 10 earlier
+    unsigned int pwm_duration = duty_cycle * _pwm_period / 1000;
     if (_pwm_thread != nullptr)
     {
         _pwm_thread->set_pwm_duration(pwm_duration);
