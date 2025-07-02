@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2016 - 2024 Mikhail Sapozhnikov
+# Copyright (C) 2016 - 2025 Mikhail Sapozhnikov
 #
 # This file is part of ship-control.
 #
@@ -17,7 +17,7 @@
 # along with ship-control.  If not, see <http://www.gnu.org/licenses/>.
 #
 
-cmake_minimum_required (VERSION 3.0)
+cmake_minimum_required (VERSION 3.10)
 
 project (ship-control)
 
@@ -54,6 +54,7 @@ set (SHIPCONTROL_SRC Log.cpp
                      GPIOPWMThread.cpp
                      GPIOSteeringController.cpp
                      GPIOUtil.cpp
+                     GPIOSwitch.cpp
                      shipcontrol.cpp)
 
 find_library (GPIOD_LIB NAMES gpiodcxx)

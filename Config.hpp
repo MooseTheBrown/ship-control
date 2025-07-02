@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016 - 2024 Mikhail Sapozhnikov
+ * Copyright (C) 2016 - 2025 Mikhail Sapozhnikov
  *
  * This file is part of ship-control.
  *
@@ -27,6 +27,7 @@
 #include "Log.hpp"
 #include "GPIOEngineConfig.hpp"
 #include "GPIOSteeringConfig.hpp"
+#include "GPIOSwitchConfig.hpp"
 #include <string>
 #include <vector>
 #include <unordered_map>
@@ -58,6 +59,8 @@ public:
     // GPIO configuration
     std::vector<GPIOEngineConfig> get_gpio_engine_configs() { return _gpio_engine_configs; }
     std::vector<GPIOSteeringConfig> get_gpio_steering_configs() { return _gpio_steering_configs; }
+    // water cooling relay switch configuration
+    GPIOSwitchConfig *get_water_cooling_relay_config() { return _water_cooling_relay_config; }
     // general configuration
     std::vector<LogBackendType> get_log_backends() { return _logBackends; }
     LogLevel get_log_level() { return _logLevel; }
@@ -80,6 +83,7 @@ protected:
     std::string _unix_socket;
     std::vector<GPIOEngineConfig> _gpio_engine_configs;
     std::vector<GPIOSteeringConfig> _gpio_steering_configs;
+    GPIOSwitchConfig *_water_cooling_relay_config;
     std::vector<LogBackendType> _logBackends;
     LogLevel _logLevel;
 

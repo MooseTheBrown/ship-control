@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016-2024 Mikhail Sapozhnikov
+ * Copyright (C) 2016 - 2025 Mikhail Sapozhnikov
  *
  * This file is part of ship-control.
  *
@@ -31,7 +31,8 @@ namespace shipcontrol
 
 Config::Config(const std::string &filename) :
     _is_ok(true),
-    _logLevel(LogLevel::ERROR)
+    _logLevel(LogLevel::ERROR),
+    _water_cooling_relay_config(nullptr)
 {
     // prepare internal string-to-value maps for:
     // 1. Linux input keys
@@ -179,6 +180,7 @@ Config::Config(const std::string &filename) :
 
 Config::~Config()
 {
+    delete _water_cooling_relay_config;
 }
 
 void Config::parse(const std::string &filename)
@@ -518,6 +520,20 @@ void Config::parse(const std::string &filename)
             }
 
             _gpio_steering_configs.push_back(gpio_steering_config);
+        }
+    }
+
+    if (j.find("water_cooling_relay") != j.end())
+    {
+        _water_cooling_relay_config = new GPIOSwitchConfig();
+        auto wc_relay = j["water_cooling_relay"];
+        if (wc_relay.find("chip_path") != wc_relay.end())
+        {
+            _water_cooling_relay_config->chip_path = wc_relay["chip_path"].get<std::string>();
+        }
+        if (wc_relay.find("line") != wc_relay.end())
+        {
+            _water_cooling_relay_config->line_num = wc_relay["line"].get<unsigned int>();
         }
     }
 }
