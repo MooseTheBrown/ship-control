@@ -40,7 +40,7 @@ GPIOSwitch::GPIOSwitch(const std::string &chip_path, unsigned int line_num) :
         _chip = new gpiod::chip(chip_path);
         _line = _chip->get_line(line_num);
         _line_init = true;
-        _line.request({"shipcontrol::GPIOPWMThread",
+        _line.request({"shipcontrol::GPIOSwitch",
                 gpiod::line_request::DIRECTION_OUTPUT,
                 0},
                 0);
