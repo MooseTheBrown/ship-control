@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016 - 2023 Mikhail Sapozhnikov
+ * Copyright (C) 2016 - 2025 Mikhail Sapozhnikov
  *
  * This file is part of ship-control.
  *
@@ -32,6 +32,7 @@
 #include "shipcontrol.hpp"
 #include "GPIOEngineController.hpp"
 #include "GPIOSteeringController.hpp"
+#include "GPIOSwitchConfig.hpp"
 
 extern void signal_handler(int sig);
 
@@ -50,7 +51,8 @@ ShipControl::ShipControl() :
     _stop(false),
     _mode(ShipControlMode::NORMAL),
     _cmd_speed(""),
-    _cmd_steering("")
+    _cmd_steering(""),
+    _water_cooling_switch(nullptr)
 {
     _log = Log::getInstance();
 }
@@ -79,6 +81,10 @@ ShipControl::~ShipControl()
         {
             delete controller;
         }
+    }
+    if (_water_cooling_switch != nullptr)
+    {
+        delete _water_cooling_switch;
     }
     Log::release();
 }
@@ -260,6 +266,13 @@ int ShipControl::init()
     {
         GPIOSteeringController *gpio_steering_controller  = new GPIOSteeringController(gpio_steering_config);
         _servo_controllers.push_back(gpio_steering_controller);
+    }
+
+    // initialize water cooling switch
+    GPIOSwitchConfig *wc_config = _config->get_water_cooling_relay_config();
+    if (wc_config != nullptr)
+    {
+        _water_cooling_switch = new GPIOSwitch(wc_config->chip_path, wc_config->line_num);
     }
 
     // initialize Unix socket listener
@@ -530,6 +543,8 @@ void ShipControl::speed_up()
         return;
     }
 
+    set_water_cooling(new_speed);
+
     for (ServoController *controller : _servo_controllers)
     {
         controller->set_speed(new_speed);
@@ -607,6 +622,8 @@ void ShipControl::speed_down()
         return;
     }
 
+    set_water_cooling(new_speed);
+
     for (ServoController *controller : _servo_controllers)
     {
         controller->set_speed(new_speed);
@@ -618,6 +635,7 @@ void ShipControl::speed_down()
 void ShipControl::set_speed(const std::string &speed_str)
 {
     SpeedVal new_speed = ServoController::str_to_speed(speed_str);
+    set_water_cooling(new_speed);
     for (ServoController *controller : _servo_controllers)
     {
         controller->set_speed(new_speed);
@@ -661,6 +679,27 @@ void ShipControl::setup_signals()
     ignore_act.sa_flags = 0;
 
     sigaction(SIGPIPE, &ignore_act, nullptr);
+}
+
+void ShipControl::set_water_cooling(SpeedVal speed)
+{
+    if (_water_cooling_switch == nullptr)
+    {
+        return;
+    }
+    if (_water_cooling_switch->is_ok() == false)
+    {
+        return;
+    }
+
+    if (speed == SpeedVal::STOP)
+    {
+        _water_cooling_switch->off();
+    }
+    else
+    {
+        _water_cooling_switch->on();
+    }
 }
 
 } // namespace shipcontrol

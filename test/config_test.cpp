@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016 - 2024 Mikhail Sapozhnikov
+ * Copyright (C) 2016 - 2025 Mikhail Sapozhnikov
  *
  * This file is part of ship-control.
  *
@@ -126,6 +126,11 @@ TEST(Config, ConfigTest)
     ASSERT_EQ(16600, gpio_steering_configs[1].pwm_period);
     ASSERT_EQ(6, gpio_steering_configs[1].min_duty_cycle);
     ASSERT_EQ(12, gpio_steering_configs[1].max_duty_cycle);
+
+    sc::GPIOSwitchConfig *wc_config = config.get_water_cooling_relay_config();
+    ASSERT_FALSE(wc_config == nullptr);
+    ASSERT_STREQ("/dev/gpiochip0", wc_config->chip_path.c_str());
+    ASSERT_EQ(7, wc_config->line_num);
 
     std::vector<sc::LogBackendType> log_backends = config.get_log_backends();
     ASSERT_EQ(2, log_backends.size());

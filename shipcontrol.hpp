@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016 - 2023 Mikhail Sapozhnikov
+ * Copyright (C) 2016 - 2025 Mikhail Sapozhnikov
  *
  * This file is part of ship-control.
  *
@@ -31,6 +31,7 @@
 #include "SysLog.hpp"
 #include "DataProvider.hpp"
 #include "UnixListener.hpp"
+#include "GPIOSwitch.hpp"
 
 namespace shipcontrol
 {
@@ -85,6 +86,7 @@ protected:
     // used in command mode only
     std::string _cmd_speed;
     std::string _cmd_steering;
+    GPIOSwitch *_water_cooling_switch;
 
     int handle_cmd_line(int argc, char **argv);
     int init();
@@ -96,6 +98,7 @@ protected:
     void set_speed(const std::string &speed_str);
     void set_steering(const std::string &steering_str);
     void setup_signals();
+    void set_water_cooling(SpeedVal speed);
 };
 
 } // namespace shipcontrol

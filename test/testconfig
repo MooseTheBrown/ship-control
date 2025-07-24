@@ -71,6 +71,10 @@
         "max_duty_cycle": 12
     }
     ],
+    "water_cooling_relay": {
+        "chip_path": "/dev/gpiochip0",
+        "line": 7
+    },
     "keymap": {
         "KEY_1": "SPEED_UP",
         "KEY_2": "SPEED_DOWN"
