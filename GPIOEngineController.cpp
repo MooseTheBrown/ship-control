@@ -121,19 +121,22 @@ void GPIOEngineController::set_speed(SpeedVal speed)
     {
         case GPIOReverseMode::SAME_LINE:
         {
-            unsigned int neutral = (_max_duty_cycle - _min_duty_cycle) / 2;
-            unsigned int step = (_max_duty_cycle - neutral) / 10;
+            // multiply duty cycle values by 10 to avoid data loss due to step value, which is 1/10th of difference
+            // between max and neutral duty cycle, being less than 1 and thus truncated to 0
+            unsigned int neutral = ((_max_duty_cycle * 10) + (_min_duty_cycle * 10)) / 2;
+            unsigned int step = ((_max_duty_cycle * 10) - neutral) / 10;
             int duty_cycle = neutral + step * int_speed;
-            if (duty_cycle < _min_duty_cycle)
+            if (duty_cycle < (_min_duty_cycle * 10))
             {
-                duty_cycle = _min_duty_cycle;
+                duty_cycle = _min_duty_cycle * 10;
             }
-            else if (duty_cycle > _max_duty_cycle)
+            else if (duty_cycle > (_max_duty_cycle * 10))
             {
-                duty_cycle = _max_duty_cycle;
+                duty_cycle = _max_duty_cycle * 10;
             }
 
-            unsigned int pwm_duration = duty_cycle * _pwm_period / 100;
+            // here divide by 1000 to account for 10x multiplication on the previous step
+            unsigned int pwm_duration = duty_cycle * _pwm_period / 1000;
 
             if (_pwm_thread != nullptr)
             {
@@ -166,8 +169,12 @@ void GPIOEngineController::set_speed(SpeedVal speed)
         case GPIOReverseMode::NO_REVERSE:
         {
             int_speed = std::abs(int_speed);
-            unsigned int duty_cycle = _min_duty_cycle + (int_speed * (_max_duty_cycle - _min_duty_cycle) / 10 );
-            unsigned int pwm_duration = duty_cycle * _pwm_period / 100;
+            // multiply duty cycle values by 10 to avoid data loss due to step value, which is 1/10th of difference
+            // between max and min duty cycle, being less than 1 and thus truncated to 0
+            unsigned int duty_cycle = _min_duty_cycle * 10 +
+                    (int_speed * (_max_duty_cycle * 10 - _min_duty_cycle * 10) / 10 );
+            // here divide by 1000 to account for 10x multiplication on the previous step
+            unsigned int pwm_duration = duty_cycle * _pwm_period / 1000;
             if (_pwm_thread != nullptr)
             {
                 _pwm_thread->set_pwm_duration(static_cast<unsigned int>(pwm_duration));
